@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Acolchado Vegetal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px;
+        }
+
+        .logo:hover {
+            background-color: #f9fafb;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #16a34a;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        /* Platform Selector */
+        .platform-selector {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .platform-selector .logo {
+            margin-bottom: 0;
+        }
+
+        .platform-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .platform-selector:hover .platform-dropdown {
+            display: block;
+        }
+
+        .platform-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .platform-option:last-child {
+            border-bottom: none;
+        }
+
+        .platform-option:hover {
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .platform-option.active {
+            background-color: #ecfdf5;
+            color: #16a34a;
+        }
+
+        .platform-option-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .platform-option-icon.acolchado {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+
+        .platform-option-icon.mantenimiento {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .platform-option-icon.servicio-social {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .platform-option-text {
+            flex: 1;
+        }
+
+        .platform-option-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .platform-option-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .user-info {
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #16a34a;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #16a34a;
+        }
+
+
+
+        /* Navigation */
+        .nav {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .nav-link.active {
+            background-color: #ecfdf5;
+            color: #16a34a;
+            border-right: 3px solid #16a34a;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 0;
+        }
+
+        .header {
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #16a34a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #15803d;
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #f3f4f6;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .stat-icon.annual { background-color: #3b82f6; }
+        .stat-icon.previous-month { background-color: #f59e0b; }
+        .stat-icon.current-month { background-color: #16a34a; }
+        .stat-icon.week { background-color: #8b5cf6; }
+
+        .stat-title {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            color: #6b7280;
+            margin-left: 4px;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            padding: 0 30px 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #f3f4f6;
+            margin-bottom: 20px;
+        }
+
+        .chart-container canvas {
+            max-height: 250px !important;
+        }
+
+        .chart-header {
+            margin-bottom: 24px;
+        }
+        .chart-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .chart-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* File Upload Section */
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            border: 2px dashed #d1d5db;
+            text-align: center;
+            margin: 30px;
+            transition: all 0.2s;
+        }
+
+        .upload-section:hover {
+            border-color: #16a34a;
+            background-color: #f9fafb;
+        }
+
+        .upload-section.dragover {
+            border-color: #16a34a;
+            background-color: #ecfdf5;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 24px;
+            color: #6b7280;
+        }
+
+        .upload-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .upload-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #f3f4f6;
+            overflow: hidden;
+            margin: 30px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background-color: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #6b7280;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Logout */
+        .logout {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .logout-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout-link:hover {
+            color: #991b1b;
+        }
+
+        /* Chart Stats Styles */
+        .chart-stats {
+            display: flex;
+            gap: 20px;
+            margin: 12px 0 8px 0;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #f3f4f6;
+        }
+
+        .chart-stat-item {
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .chart-stat-item strong {
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .chart-stat-item span {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        /* Chart Controls Styles */
+        .chart-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chart-controls label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .chart-type-select {
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #374151;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .chart-type-select:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.1);
+        }
+
+        /* Period selector for aggregation */
+        .period-selector {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 2px;
+        }
+
+        .period-btn {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 50px;
+        }
+
+        .period-btn:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .period-btn.active {
+            background: #16a34a;
+            color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .aggregation-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            margin-bottom: 16px;
+        }
+
+        /* Date Filter Styles */
+        .date-filter-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .date-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .date-input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #374151;
+            background-color: white;
+            min-width: 150px;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+        }
+
+        .date-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            border-color: #dc2626;
+            color: #991b1b;
+        }
+
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 20px 30px;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            border-color: #16a34a;
+            color: #166534;
+        }
+
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+        }
+        .toast {
+            min-width: 280px;
+            max-width: 420px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left-width: 4px;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            padding: 12px 14px;
+            color: #374151;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: toast-in 200ms ease-out;
+            transition: opacity 150ms ease, transform 150ms ease;
+        }
+        .toast-success { border-left-color: #16a34a; }
+        .toast-error { border-left-color: #dc2626; }
+        .toast-message { flex: 1; font-size: 14px; line-height: 1.35; }
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0 2px;
+        }
+        .toast-close:hover { color: #6b7280; }
+        .toast.hide { opacity: 0; transform: translateX(8px); }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="platform-selector">
+                <div class="logo">
+                    <div class="logo-icon">🌱</div>
+                    <div>
+                        <div class="logo-text">Acolchado Vegetal</div>
+                        <div class="logo-subtitle">Simeprode</div>
+                    </div>
+                </div>
+                <div class="platform-dropdown">
+                    <a href="index.html" class="platform-option active">
+                        <div class="platform-option-icon acolchado">🌱</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Acolchado Vegetal</div>
+                            <div class="platform-option-subtitle">Control de consumo</div>
+                        </div>
+                    </a>
+                    <a href="mantenimiento.html" class="platform-option">
+                        <div class="platform-option-icon mantenimiento">🔧</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Mantenimiento</div>
+                            <div class="platform-option-subtitle">Gestión de equipos</div>
+                        </div>
+                    </a>
+                    <a href="servicio-social.html" class="platform-option">
+                        <div class="platform-option-icon servicio-social">👥</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Servicio Social</div>
+                            <div class="platform-option-subtitle">Gestión de voluntarios</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar">A</div>
+                <div class="user-name">Administrador</div>
+                <div class="user-role">Operador</div>
+                <div class="user-status">
+                    <div class="status-dot"></div>
+                    <div class="status-text">Activo</div>
+                </div>
+            </div>
+
+            <nav>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="resumen">
+                            <div class="nav-icon">📊</div>
+                            Resumen
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="subir-archivo">
+                            <div class="nav-icon">📁</div>
+                            Subir Archivo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="registros">
+                            <div class="nav-icon">📋</div>
+                            Registros
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="logout">
+                <a href="#" class="logout-link">
+                    <div class="nav-icon">🚪</div>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Resumen Section -->
+            <div id="resumen" class="section active">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Control de Acolchado Vegetal</h1>
+                        <p class="header-subtitle">Dashboard de consumo diario</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportData()">📥 Exportar</button>
+                        <button class="btn btn-primary" onclick="showSection('subir-archivo')">📁 Cargar Datos</button>
+                    </div>
+                </header>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon annual"></div>
+                            <div class="stat-title">Anual</div>
+                        </div>
+                        <div class="stat-value" id="stat-annual">0<span class="stat-unit">ton</span></div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon previous-month"></div>
+                            <div class="stat-title">Mes Anterior</div>
+                        </div>
+                        <div class="stat-value" id="stat-previous-month">0<span class="stat-unit">ton</span></div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon current-month"></div>
+                            <div class="stat-title">Mes Actual</div>
+                        </div>
+                        <div class="stat-value" id="stat-current-month">0<span class="stat-unit">ton</span></div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon week"></div>
+                            <div class="stat-title">Última Semana</div>
+                        </div>
+                        <div class="stat-value" id="stat-week">0<span class="stat-unit">ton</span></div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="chart-section">
+                    <!-- Date Filter Controls -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Filtros de Fecha</h2>
+                            <p class="chart-subtitle">Selecciona el rango de fechas para visualizar</p>
+                        </div>
+                        <div class="date-filter-controls">
+                            <div class="date-input-group">
+                                <label for="startDate">Fecha Inicio:</label>
+                                <input type="date" id="startDate" class="date-input">
+                            </div>
+                            <div class="date-input-group">
+                                <label for="endDate">Fecha Fin:</label>
+                                <input type="date" id="endDate" class="date-input">
+                            </div>
+                            <div class="date-buttons">
+                                <button class="btn btn-primary" onclick="applyDateFilter()">Aplicar Filtro</button>
+                                <button class="btn btn-secondary" onclick="clearDateFilter()">Mostrar Todo</button>
+                                <button class="btn btn-secondary" onclick="setLastWeek()">Última Semana</button>
+                                <button class="btn btn-secondary" onclick="setLastMonth()">Último Mes</button>
+                            </div>
+                        </div>
+                <!-- Aggregation switch moved out of this box -->
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-header-top">
+                                <div>
+                                    <h2 class="chart-title" id="consumptionTitle">Consumo Diario de Acolchado Vegetal</h2>
+                                    <p class="chart-subtitle" id="consumptionSubtitle">Toneladas consumidas por día</p>
+                                </div>
+                                <div class="period-selector">
+                                    <button class="period-btn active" data-period="day" data-chart="consumption">Día</button>
+                                    <button class="period-btn" data-period="week" data-chart="consumption">Semana</button>
+                                    <button class="period-btn" data-period="month" data-chart="consumption">Mes</button>
+                                </div>
+                            </div>
+                            <div class="chart-stats">
+                                <span class="chart-stat-item">
+                                    <strong id="consumptionTotalLabel">Total período: </strong>
+                                    <span id="consumptionTotal">0 ton</span>
+                                </span>
+                                <span class="chart-stat-item">
+                                    <strong id="consumptionActiveLabel">Días con actividad: </strong>
+                                    <span id="consumptionActiveDays">0</span>
+                                </span>
+                                <span class="chart-stat-item">
+                                    <strong id="consumptionAverageLabel">Promedio diario: </strong>
+                                    <span id="consumptionAverage">0 ton</span>
+                                </span>
+                    </div>
+            </div>
+            <canvas id="consumptionChart" width="400" height="120"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-header-top">
+                                <div>
+                                    <h2 class="chart-title" id="recordsTitle">Registros por Día</h2>
+                                    <p class="chart-subtitle" id="recordsSubtitle">Cantidad de registros (viajes) por día</p>
+                                </div>
+                                <div class="period-selector">
+                                    <button class="period-btn active" data-period="day" data-chart="records">Día</button>
+                                    <button class="period-btn" data-period="week" data-chart="records">Semana</button>
+                                    <button class="period-btn" data-period="month" data-chart="records">Mes</button>
+                                </div>
+                            </div>
+                            <div class="chart-stats">
+                                <span class="chart-stat-item">
+                                    <strong id="recordsTotalLabel">Total registros: </strong>
+                                    <span id="recordsTotal">0</span>
+                                </span>
+                                <span class="chart-stat-item">
+                                    <strong id="recordsActiveLabel">Días con viajes: </strong>
+                                    <span id="recordsActiveDays">0</span>
+                                </span>
+                                <span class="chart-stat-item">
+                                    <strong id="recordsAverageLabel">Promedio/día: </strong>
+                                    <span id="recordsAverage">0</span>
+                                </span>
+                            </div>
+                        </div>
+                        <canvas id="recordsChart" width="400" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subir Archivo Section -->
+            <div id="subir-archivo" class="section">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Cargar Datos</h1>
+                        <p class="header-subtitle">Subir archivo CSV con datos de acolchado vegetal</p>
+                    </div>
+                </header>
+
+                <div class="upload-section" id="upload-zone">
+                    <div class="upload-icon">📄</div>
+                    <h3 class="upload-title">Arrastra tu archivo CSV aquí</h3>
+                    <p class="upload-description">
+                        O haz clic para seleccionar el archivo datos.csv<br>
+                        Formato: Boleta, Fecha, Camion, Material, Toneladas
+                    </p>
+                    <input type="file" id="csvFileInput" class="file-input" accept=".csv" />
+                    <button class="btn btn-primary" onclick="document.getElementById('csvFileInput').click()">
+                        Seleccionar Archivo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Registros Section -->
+            <div id="registros" class="section">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Registros de Acolchado</h1>
+                        <p class="header-subtitle">Todos los registros cargados</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="filterRecords()">🔍 Filtrar</button>
+                    </div>
+                </header>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Boleta</th>
+                                <th>Fecha</th>
+                                <th>Camión</th>
+                                <th>Material</th>
+                                <th>Toneladas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-table">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #9ca3af;">
+                                    No hay registros cargados. Sube un archivo CSV para ver los datos.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create toast container
+        (function ensureToastContainer(){
+            const existing = document.getElementById('toast-container');
+            if (!existing) {
+                const div = document.createElement('div');
+                div.id = 'toast-container';
+                div.className = 'toast-container';
+                document.addEventListener('DOMContentLoaded', () => document.body.appendChild(div));
+            }
+        })();
+        // Global variables
+        let rawData = [];
+        let acolchadoData = [];
+        let chart = null;
+        let recordsChart = null;
+        let filteredData = [];
+
+        // Navigation function
+        function showSection(sectionName) {
+            console.log('Showing section:', sectionName);
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Update nav link
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const targetLink = document.querySelector(`[data-section="${sectionName}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+        }
+
+        // Initialize chart function
+        function initializeChart() {
+            // Initialize consumption chart (bar only)
+            const chartCanvas = document.getElementById('consumptionChart');
+            if (chartCanvas) {
+                const ctx = chartCanvas.getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sin datos'],
+                        datasets: [{
+                            label: 'Toneladas',
+                            data: [0],
+                            backgroundColor: 'rgba(22, 163, 74, 0.6)',
+                            borderColor: '#16a34a',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: getChartOptions('Toneladas', false)
+                });
+            }
+
+            // Initialize records chart (bar only)
+            const recordsCanvas = document.getElementById('recordsChart');
+            if (recordsCanvas) {
+                const ctx2 = recordsCanvas.getContext('2d');
+                recordsChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sin datos'],
+                        datasets: [{
+                            label: 'Registros',
+                            data: [0],
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: getChartOptions('Cantidad de Registros', true)
+                });
+            }
+        }
+
+        // Helper function to get chart options
+        function getChartOptions(yAxisLabel, isRecords = false, xAxisLabel = 'Fecha') {
+            const baseOptions = {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                if (value === 0) {
+                                    return isRecords ? 'Sin registros' : 'Sin actividad: 0 toneladas';
+                                }
+                                return isRecords ? `Registros: ${value}` : `Toneladas: ${value.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: yAxisLabel
+                        },
+                        ticks: isRecords ? { stepSize: 1 } : {}
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: xAxisLabel
+                        }
+                    }
+                }
+            };
+            
+            return baseOptions;
+        }
+
+        // DOM Content Loaded - Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Initialize navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-section');
+                    if (section) {
+                        showSection(section);
+                    }
+                });
+            });
+
+            // Initialize file upload
+            const uploadZone = document.getElementById('upload-zone');
+            const fileInput = document.getElementById('csvFileInput');
+            const orgSelector = document.getElementById('orgSelector');
+
+            if (uploadZone && fileInput) {
+                uploadZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadZone.classList.add('dragover');
+                });
+
+                uploadZone.addEventListener('dragleave', () => {
+                    uploadZone.classList.remove('dragover');
+                });
+
+                uploadZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadZone.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleFile(files[0]);
+                    }
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleFile(e.target.files[0]);
+                    }
+                });
+            }
+
+
+
+            // Initialize chart
+            initializeChart();
+
+            // Add demo button
+            setTimeout(() => {
+                const uploadSection = document.querySelector('.upload-section');
+                if (uploadSection) {
+                    const demoButton = document.createElement('button');
+                    demoButton.className = 'btn btn-secondary';
+                    demoButton.style.marginLeft = '12px';
+                    demoButton.innerHTML = '🧪 Cargar Datos de Prueba';
+                    demoButton.onclick = loadSampleData;
+                    
+                    const selectButton = uploadSection.querySelector('.btn-primary');
+                    if (selectButton) {
+                        selectButton.parentNode.insertBefore(demoButton, selectButton.nextSibling);
+                    }
+                }
+            }, 500);
+
+            // Period selector handling
+            const savedModeConsumption = localStorage.getItem('aggregationModeConsumption') || 'day';
+            const savedModeRecords = localStorage.getItem('aggregationModeRecords') || 'day';
+
+            // Initialize period selectors
+            initializePeriodSelectors('consumption', savedModeConsumption);
+            initializePeriodSelectors('records', savedModeRecords);
+
+            // Initialize labels according to current modes
+            updateAggregationLabels(savedModeConsumption, savedModeRecords);
+            updateCharts();
+        });
+
+        function handleFile(file) {
+            if (!file.name.endsWith('.csv')) {
+                showAlert('Por favor selecciona un archivo CSV válido.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvData = e.target.result;
+                parseCSVData(csvData);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSVData(csvData) {
+            Papa.parse(csvData, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    rawData = results.data;
+                    
+                    // Filter only "ACOLCHADO VEGETAL" records
+                    acolchadoData = rawData.filter(row => 
+                        row.Material && row.Material.trim().toUpperCase() === 'ACOLCHADO VEGETAL'
+                    );
+
+                    if (acolchadoData.length === 0) {
+                        showAlert('No se encontraron registros de ACOLCHADO VEGETAL en el archivo.', 'error');
+                        return;
+                    }
+
+                    // Process data
+                    processData();
+                    initializeDateFilter();
+                    updateStats();
+                    updateCharts();
+                    updateRecordsTable();
+                    
+                    showAlert(`Se cargaron ${acolchadoData.length} registros de acolchado vegetal exitosamente.`, 'success');
+                    showSection('resumen');
+                },
+                error: function(error) {
+                    showAlert('Error al procesar el archivo CSV: ' + error.message, 'error');
+                }
+            });
+        }
+
+        function processData() {
+            // Ensure data has proper date parsing and numeric conversion
+            acolchadoData.forEach(row => {
+                // Parse date (assuming DD/MM/YYYY format)
+                const dateParts = row.Fecha.split('/');
+                row.dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+                row.Toneladas = parseFloat(row.Toneladas) || 0;
+            });
+
+            // Sort by date
+            acolchadoData.sort((a, b) => a.dateObj - b.dateObj);
+            
+            // Initialize filtered data with all data
+            filteredData = [...acolchadoData];
+        }
+
+        function initializeDateFilter() {
+            if (acolchadoData.length === 0) return;
+
+            // Set default date range to show all data
+            const dates = acolchadoData.map(row => row.dateObj);
+            const minDate = new Date(Math.min(...dates));
+            const maxDate = new Date(Math.max(...dates));
+
+            // Format dates for HTML date input (YYYY-MM-DD)
+            const startInput = document.getElementById('startDate');
+            const endInput = document.getElementById('endDate');
+
+            if (startInput && endInput) {
+                startInput.value = minDate.toISOString().split('T')[0];
+                endInput.value = maxDate.toISOString().split('T')[0];
+            }
+        }
+
+        // Date filter functions
+        function applyDateFilter() {
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+
+            if (!startDateInput.value || !endDateInput.value) {
+                showAlert('Por favor selecciona ambas fechas.', 'error');
+                return;
+            }
+
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            endDate.setHours(23, 59, 59, 999); // Include end date
+
+            if (startDate > endDate) {
+                showAlert('La fecha de inicio debe ser anterior a la fecha fin.', 'error');
+                return;
+            }
+
+            // Filter data by date range
+            filteredData = acolchadoData.filter(row => 
+                row.dateObj >= startDate && row.dateObj <= endDate
+            );
+
+            if (filteredData.length === 0) {
+                showAlert('No hay datos en el rango de fechas seleccionado.', 'error');
+                return;
+            }
+
+            // Update charts with filtered data
+            updateCharts();
+            showAlert(`Mostrando ${filteredData.length} registros del ${startDateInput.value} al ${endDateInput.value}.`, 'success');
+        }
+
+        function clearDateFilter() {
+            filteredData = [...acolchadoData];
+            initializeDateFilter();
+            updateCharts();
+            showAlert('Mostrando todos los datos disponibles.', 'success');
+        }
+
+        function setLastWeek() {
+            if (acolchadoData.length === 0) {
+                showAlert('No hay datos cargados.', 'error');
+                return;
+            }
+
+            const today = new Date();
+            const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            document.getElementById('startDate').value = oneWeekAgo.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            
+            applyDateFilter();
+        }
+
+        function setLastMonth() {
+            if (acolchadoData.length === 0) {
+                showAlert('No hay datos cargados.', 'error');
+                return;
+            }
+
+            const today = new Date();
+            const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+            document.getElementById('startDate').value = oneMonthAgo.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            
+            applyDateFilter();
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            // Annual total
+            const annualTotal = acolchadoData
+                .filter(row => row.dateObj.getFullYear() === currentYear)
+                .reduce((sum, row) => sum + row.Toneladas, 0);
+
+            // Previous month total
+            const previousMonthTotal = acolchadoData
+                .filter(row => 
+                    row.dateObj.getFullYear() === currentYear && 
+                    row.dateObj.getMonth() === currentMonth - 1
+                )
+                .reduce((sum, row) => sum + row.Toneladas, 0);
+
+            // Current month total
+            const currentMonthTotal = acolchadoData
+                .filter(row => 
+                    row.dateObj.getFullYear() === currentYear && 
+                    row.dateObj.getMonth() === currentMonth
+                )
+                .reduce((sum, row) => sum + row.Toneladas, 0);
+
+            // Last week total
+            const weekTotal = acolchadoData
+                .filter(row => row.dateObj >= oneWeekAgo)
+                .reduce((sum, row) => sum + row.Toneladas, 0);
+
+            // Update UI
+            document.getElementById('stat-annual').innerHTML = `${annualTotal.toFixed(2)}<span class="stat-unit">ton</span>`;
+            document.getElementById('stat-previous-month').innerHTML = `${previousMonthTotal.toFixed(2)}<span class="stat-unit">ton</span>`;
+            document.getElementById('stat-current-month').innerHTML = `${currentMonthTotal.toFixed(2)}<span class="stat-unit">ton</span>`;
+            document.getElementById('stat-week').innerHTML = `${weekTotal.toFixed(2)}<span class="stat-unit">ton</span>`;
+        }
+
+        function updateCharts() {
+            // Use filtered data instead of all data
+            const dataToUse = filteredData.length > 0 ? filteredData : acolchadoData;
+            
+            if (dataToUse.length === 0) return;
+            
+            // Get date range from filtered data or inputs
+            let startDate, endDate;
+            
+            if (dataToUse.length > 0) {
+                const dates = dataToUse.map(row => row.dateObj);
+                startDate = new Date(Math.min(...dates));
+                endDate = new Date(Math.max(...dates));
+            }
+
+            const modes = getAggregationModes();
+            const consumptionMode = modes.consumption;
+            const recordsMode = modes.records;
+            const consumptionXAxisLabel = getXAxisLabelByMode(consumptionMode);
+            const recordsXAxisLabel = getXAxisLabelByMode(recordsMode);
+
+            // Build consumption data
+            let labelsConsumption = [];
+            let toneladas = [];
+            if (consumptionMode === 'month') {
+                const monthKeys = [];
+                const monthLabels = [];
+                const monthlyData = {};
+                let iter = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+                const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+                while (iter <= last) {
+                    const key = `${iter.getFullYear()}-${String(iter.getMonth() + 1).padStart(2, '0')}`;
+                    const label = `${String(iter.getMonth() + 1).padStart(2, '0')}/${iter.getFullYear()}`;
+                    monthKeys.push(key);
+                    monthLabels.push(label);
+                    monthlyData[key] = 0;
+                    iter.setMonth(iter.getMonth() + 1);
+                }
+                dataToUse.forEach(row => {
+                    const key = `${row.dateObj.getFullYear()}-${String(row.dateObj.getMonth() + 1).padStart(2, '0')}`;
+                    if (monthlyData[key] === undefined) monthlyData[key] = 0;
+                    monthlyData[key] += row.Toneladas;
+                });
+                labelsConsumption = monthLabels;
+                toneladas = monthKeys.map(k => monthlyData[k]);
+            } else if (consumptionMode === 'week') {
+                const weekKeys = [];
+                const weekLabels = [];
+                const weeklyData = {};
+                
+                // Get the start of the week (Monday) for the start date
+                const startOfWeek = new Date(startDate);
+                const dayOfWeek = startOfWeek.getDay();
+                const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+                startOfWeek.setDate(diff);
+                
+                // Get the end of the week (Sunday) for the end date
+                const endOfWeek = new Date(endDate);
+                const dayOfWeekEnd = endOfWeek.getDay();
+                const diffEnd = endOfWeek.getDate() - dayOfWeekEnd + (dayOfWeekEnd === 0 ? 0 : 7);
+                endOfWeek.setDate(diffEnd);
+                
+                let iter = new Date(startOfWeek);
+                while (iter <= endOfWeek) {
+                    const year = iter.getFullYear();
+                    const weekNumber = getWeekNumber(iter);
+                    const key = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+                    const label = `Sem ${weekNumber}/${year}`;
+                    weekKeys.push(key);
+                    weekLabels.push(label);
+                    weeklyData[key] = 0;
+                    iter.setDate(iter.getDate() + 7);
+                }
+                
+                dataToUse.forEach(row => {
+                    const year = row.dateObj.getFullYear();
+                    const weekNumber = getWeekNumber(row.dateObj);
+                    const key = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+                    if (weeklyData[key] === undefined) weeklyData[key] = 0;
+                    weeklyData[key] += row.Toneladas;
+                });
+                
+                labelsConsumption = weekLabels;
+                toneladas = weekKeys.map(k => weeklyData[k]);
+            } else {
+                const allDates = [];
+                const currentDate = new Date(startDate);
+                while (currentDate <= endDate) {
+                    const dateString = formatDateToDDMMYYYY(currentDate);
+                    allDates.push(dateString);
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                const dailyData = {};
+                allDates.forEach(dateKey => { dailyData[dateKey] = 0; });
+                dataToUse.forEach(row => { dailyData[row.Fecha] += row.Toneladas; });
+                labelsConsumption = allDates;
+                toneladas = labelsConsumption.map(date => dailyData[date]);
+            }
+
+            // Update consumption statistics
+            updateConsumptionStatistics(toneladas, labelsConsumption.length, consumptionMode);
+
+            // Update consumption chart (bar only)
+            updateConsumptionChart(labelsConsumption, toneladas, 'bar', consumptionXAxisLabel);
+
+            // Build records data
+            let labelsRecords = [];
+            let recordCounts = [];
+            if (recordsMode === 'month') {
+                const monthKeysR = [];
+                const monthLabelsR = [];
+                const monthlyRecords = {};
+                let iterR = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+                const lastR = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+                while (iterR <= lastR) {
+                    const keyR = `${iterR.getFullYear()}-${String(iterR.getMonth() + 1).padStart(2, '0')}`;
+                    const labelR = `${String(iterR.getMonth() + 1).padStart(2, '0')}/${iterR.getFullYear()}`;
+                    monthKeysR.push(keyR);
+                    monthLabelsR.push(labelR);
+                    monthlyRecords[keyR] = 0;
+                    iterR.setMonth(iterR.getMonth() + 1);
+                }
+                dataToUse.forEach(row => {
+                    const keyR = `${row.dateObj.getFullYear()}-${String(row.dateObj.getMonth() + 1).padStart(2, '0')}`;
+                    if (monthlyRecords[keyR] === undefined) monthlyRecords[keyR] = 0;
+                    monthlyRecords[keyR] += 1;
+                });
+                labelsRecords = monthLabelsR;
+                recordCounts = monthKeysR.map(k => monthlyRecords[k]);
+            } else if (recordsMode === 'week') {
+                const weekKeysR = [];
+                const weekLabelsR = [];
+                const weeklyRecords = {};
+                
+                // Get the start of the week (Monday) for the start date
+                const startOfWeek = new Date(startDate);
+                const dayOfWeek = startOfWeek.getDay();
+                const diff = startOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday
+                startOfWeek.setDate(diff);
+                
+                // Get the end of the week (Sunday) for the end date
+                const endOfWeek = new Date(endDate);
+                const dayOfWeekEnd = endOfWeek.getDay();
+                const diffEnd = endOfWeek.getDate() - dayOfWeekEnd + (dayOfWeekEnd === 0 ? 0 : 7);
+                endOfWeek.setDate(diffEnd);
+                
+                let iter = new Date(startOfWeek);
+                while (iter <= endOfWeek) {
+                    const year = iter.getFullYear();
+                    const weekNumber = getWeekNumber(iter);
+                    const key = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+                    const label = `Sem ${weekNumber}/${year}`;
+                    weekKeysR.push(key);
+                    weekLabelsR.push(label);
+                    weeklyRecords[key] = 0;
+                    iter.setDate(iter.getDate() + 7);
+                }
+                
+                dataToUse.forEach(row => {
+                    const year = row.dateObj.getFullYear();
+                    const weekNumber = getWeekNumber(row.dateObj);
+                    const key = `${year}-W${String(weekNumber).padStart(2, '0')}`;
+                    if (weeklyRecords[key] === undefined) weeklyRecords[key] = 0;
+                    weeklyRecords[key] += 1;
+                });
+                
+                labelsRecords = weekLabelsR;
+                recordCounts = weekKeysR.map(k => weeklyRecords[k]);
+            } else {
+                const allDatesR = [];
+                const currentDateR = new Date(startDate);
+                while (currentDateR <= endDate) {
+                    const dateStringR = formatDateToDDMMYYYY(currentDateR);
+                    allDatesR.push(dateStringR);
+                    currentDateR.setDate(currentDateR.getDate() + 1);
+                }
+                const dailyRecordsR = {};
+                allDatesR.forEach(dateKey => { dailyRecordsR[dateKey] = 0; });
+                dataToUse.forEach(row => { dailyRecordsR[row.Fecha] += 1; });
+                labelsRecords = allDatesR;
+                recordCounts = labelsRecords.map(date => dailyRecordsR[date]);
+            }
+
+            // Update records statistics
+            updateRecordsStatistics(recordCounts, labelsRecords.length, recordsMode);
+
+            // Update records chart (bar only)
+            updateRecordsChart(labelsRecords, recordCounts, 'bar', recordsXAxisLabel);
+        }
+
+        function updateConsumptionStatistics(toneladas, totalBuckets, mode = 'day') {
+            const totalToneladas = toneladas.reduce((sum, val) => sum + val, 0);
+            const activeBuckets = toneladas.filter(val => val > 0).length;
+            const average = activeBuckets > 0 ? totalToneladas / activeBuckets : 0;
+            document.getElementById('consumptionTotal').textContent = `${totalToneladas.toFixed(2)} ton`;
+            document.getElementById('consumptionActiveDays').textContent = `${activeBuckets} de ${totalBuckets}`;
+            document.getElementById('consumptionAverage').textContent = `${average.toFixed(2)} ton`;
+        }
+
+        function updateRecordsStatistics(recordCounts, totalBuckets, mode = 'day') {
+            const totalRecords = recordCounts.reduce((sum, val) => sum + val, 0);
+            const activeBuckets = recordCounts.filter(val => val > 0).length;
+            const average = activeBuckets > 0 ? totalRecords / activeBuckets : 0;
+            document.getElementById('recordsTotal').textContent = totalRecords;
+            document.getElementById('recordsActiveDays').textContent = `${activeBuckets} de ${totalBuckets}`;
+            document.getElementById('recordsAverage').textContent = `${average.toFixed(1)} viajes`;
+        }
+
+        function updateConsumptionChart(dates, toneladas, chartType, xAxisLabel = 'Fecha') {
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const ctx = document.getElementById('consumptionChart').getContext('2d');
+            const isLine = chartType === 'line';
+            
+            let datasetConfig = {
+                label: 'Toneladas',
+                data: toneladas
+            };
+
+            if (isLine) {
+                datasetConfig = {
+                    ...datasetConfig,
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1,
+                    pointBackgroundColor: toneladas.map(val => val === 0 ? '#ef4444' : '#16a34a'),
+                    pointBorderColor: toneladas.map(val => val === 0 ? '#ef4444' : '#16a34a'),
+                    pointRadius: toneladas.map(val => val === 0 ? 3 : 4)
+                };
+            } else {
+                datasetConfig = {
+                    ...datasetConfig,
+                    backgroundColor: toneladas.map(val => val === 0 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(22, 163, 74, 0.6)'),
+                    borderColor: toneladas.map(val => val === 0 ? '#ef4444' : '#16a34a'),
+                    borderWidth: 1
+                };
+            }
+
+            chart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: dates,
+                    datasets: [datasetConfig]
+                },
+                options: getChartOptions('Toneladas', false, xAxisLabel)
+            });
+        }
+
+        function updateRecordsChart(dates, recordCounts, chartType, xAxisLabel = 'Fecha') {
+            if (recordsChart) {
+                recordsChart.destroy();
+            }
+            
+            const ctx2 = document.getElementById('recordsChart').getContext('2d');
+            const isLine = chartType === 'line';
+            
+            let datasetConfig = {
+                label: 'Registros',
+                data: recordCounts
+            };
+
+            if (isLine) {
+                datasetConfig = {
+                    ...datasetConfig,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1,
+                    pointBackgroundColor: recordCounts.map(val => val === 0 ? '#ef4444' : '#3b82f6'),
+                    pointBorderColor: recordCounts.map(val => val === 0 ? '#ef4444' : '#3b82f6'),
+                    pointRadius: recordCounts.map(val => val === 0 ? 3 : 4)
+                };
+            } else {
+                datasetConfig = {
+                    ...datasetConfig,
+                    backgroundColor: recordCounts.map(val => val === 0 ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.6)'),
+                    borderColor: recordCounts.map(val => val === 0 ? '#ef4444' : '#3b82f6'),
+                    borderWidth: 1
+                };
+            }
+
+            recordsChart = new Chart(ctx2, {
+                type: chartType,
+                data: {
+                    labels: dates,
+                    datasets: [datasetConfig]
+                },
+                options: getChartOptions('Cantidad de Registros', true, xAxisLabel)
+            });
+        }
+
+        // Chart type change functions
+        // Chart type change functions removed (bar only)
+
+        // Helper function to format date to DD/MM/YYYY
+        function formatDateToDDMMYYYY(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function getAggregationMode() {
+            // Backward compat: return consumption mode
+            const sw = document.getElementById('aggregationSwitchConsumption');
+            if (sw) return sw.checked ? 'month' : 'day';
+            const saved = localStorage.getItem('aggregationModeConsumption') || 'day';
+            return saved;
+        }
+
+        function initializePeriodSelectors(chartType, savedMode) {
+            const buttons = document.querySelectorAll(`[data-chart="${chartType}"]`);
+            buttons.forEach(btn => {
+                // Set initial active state
+                if (btn.dataset.period === savedMode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+
+                // Add click event listener
+                btn.addEventListener('click', () => {
+                    const period = btn.dataset.period;
+                    const chartType = btn.dataset.chart;
+                    
+                    // Update active state
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Save to localStorage
+                    localStorage.setItem(`aggregationMode${chartType.charAt(0).toUpperCase() + chartType.slice(1)}`, period);
+                    
+                    // Update charts and labels
+                    const modes = getAggregationModes();
+                    updateAggregationLabels(modes.consumption, modes.records);
+                    updateCharts();
+                });
+            });
+        }
+
+        function getAggregationModes() {
+            const consumptionMode = localStorage.getItem('aggregationModeConsumption') || 'day';
+            const recordsMode = localStorage.getItem('aggregationModeRecords') || 'day';
+            return { consumption: consumptionMode, records: recordsMode };
+        }
+
+        function getXAxisLabelByMode(mode) {
+            switch(mode) {
+                case 'day': return 'Fecha';
+                case 'week': return 'Semana';
+                case 'month': return 'Mes';
+                default: return 'Fecha';
+            }
+        }
+
+        function getWeekNumber(date) {
+            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function updateAggregationLabels(consumptionMode, recordsMode) {
+            const consumptionTotalLabel = document.getElementById('consumptionTotalLabel');
+            const consumptionActiveLabel = document.getElementById('consumptionActiveLabel');
+            const consumptionAverageLabel = document.getElementById('consumptionAverageLabel');
+            const recordsTotalLabel = document.getElementById('recordsTotalLabel');
+            const recordsActiveLabel = document.getElementById('recordsActiveLabel');
+            const recordsAverageLabel = document.getElementById('recordsAverageLabel');
+            const consumptionTitle = document.getElementById('consumptionTitle');
+            const consumptionSubtitle = document.getElementById('consumptionSubtitle');
+            const recordsTitle = document.getElementById('recordsTitle');
+            const recordsSubtitle = document.getElementById('recordsSubtitle');
+
+            // Helper function to get period text
+            const getPeriodText = (mode) => {
+                switch(mode) {
+                    case 'day': return 'día';
+                    case 'week': return 'semana';
+                    case 'month': return 'mes';
+                    default: return 'día';
+                }
+            };
+
+            const getPeriodTextPlural = (mode) => {
+                switch(mode) {
+                    case 'day': return 'Días';
+                    case 'week': return 'Semanas';
+                    case 'month': return 'Meses';
+                    default: return 'Días';
+                }
+            };
+
+            if (consumptionTotalLabel) consumptionTotalLabel.textContent = 'Total período: ';
+            if (consumptionActiveLabel) consumptionActiveLabel.textContent = `${getPeriodTextPlural(consumptionMode)} con actividad: `;
+            if (consumptionAverageLabel) consumptionAverageLabel.textContent = `Promedio por ${getPeriodText(consumptionMode)}: `;
+            if (recordsTotalLabel) recordsTotalLabel.textContent = 'Total registros: ';
+            if (recordsActiveLabel) recordsActiveLabel.textContent = `${getPeriodTextPlural(recordsMode)} con viajes: `;
+            if (recordsAverageLabel) recordsAverageLabel.textContent = `Promedio por ${getPeriodText(recordsMode)}: `;
+
+            if (consumptionTitle) consumptionTitle.textContent = `Consumo por ${getPeriodText(consumptionMode).charAt(0).toUpperCase() + getPeriodText(consumptionMode).slice(1)} de Acolchado Vegetal`;
+            if (consumptionSubtitle) consumptionSubtitle.textContent = `Toneladas consumidas por ${getPeriodText(consumptionMode)}`;
+            if (recordsTitle) recordsTitle.textContent = `Registros por ${getPeriodText(recordsMode).charAt(0).toUpperCase() + getPeriodText(recordsMode).slice(1)}`;
+            if (recordsSubtitle) recordsSubtitle.textContent = `Cantidad de registros (viajes) por ${getPeriodText(recordsMode)}`;
+        }
+
+        function updateRecordsTable() {
+            const tbody = document.getElementById('records-table');
+            tbody.innerHTML = '';
+
+            acolchadoData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.Boleta}</td>
+                    <td>${row.Fecha}</td>
+                    <td>${row.Camion}</td>
+                    <td>${row.Material}</td>
+                    <td>${row.Toneladas.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showAlert(message, type) {
+            showToast(message, type);
+        }
+
+        function showToast(message, type = 'success', durationMs = 4000) {
+            const container = document.getElementById('toast-container') || (() => {
+                const div = document.createElement('div');
+                div.id = 'toast-container';
+                div.className = 'toast-container';
+                document.body.appendChild(div);
+                return div;
+            })();
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            const msg = document.createElement('div');
+            msg.className = 'toast-message';
+            msg.textContent = message;
+
+            const close = document.createElement('button');
+            close.className = 'toast-close';
+            close.innerHTML = '&times;';
+            close.addEventListener('click', () => removeToast(toast));
+
+            toast.appendChild(msg);
+            toast.appendChild(close);
+            container.appendChild(toast);
+
+            const ttl = Math.max(1500, durationMs);
+            setTimeout(() => removeToast(toast), ttl);
+        }
+
+        function removeToast(toastEl) {
+            if (!toastEl) return;
+            toastEl.classList.add('hide');
+            setTimeout(() => toastEl.remove(), 180);
+        }
+
+        // Utility functions
+        function exportData() {
+            if (acolchadoData.length === 0) {
+                showAlert('No hay datos para exportar.', 'error');
+                return;
+            }
+
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Boleta,Fecha,Camion,Material,Toneladas\n"
+                + acolchadoData.map(row => 
+                    `"${row.Boleta}","${row.Fecha}","${row.Camion}","${row.Material}","${row.Toneladas}"`
+                ).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "acolchado_vegetal_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function filterRecords() {
+            const filterDate = prompt("Ingresa una fecha para filtrar (DD/MM/YYYY) o deja vacío para mostrar todos:");
+            
+            if (filterDate === null) return;
+            
+            const tbody = document.getElementById('records-table');
+            tbody.innerHTML = '';
+
+            let filteredData = acolchadoData;
+            if (filterDate.trim()) {
+                filteredData = acolchadoData.filter(row => row.Fecha === filterDate.trim());
+            }
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #9ca3af;">No se encontraron registros para el filtro aplicado.</td></tr>';
+                return;
+            }
+
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.Boleta}</td>
+                    <td>${row.Fecha}</td>
+                    <td>${row.Camion}</td>
+                    <td>${row.Material}</td>
+                    <td>${row.Toneladas.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Sample data for demo purposes
+        function loadSampleData() {
+            console.log('Loading sample data...');
+            const sampleCSV = `"Boleta","Fecha","Camion","Material","Toneladas"
+"5966143","21/07/2025","C950300-02","ACOLCHADO VEGETAL","2.79"
+"5966236","21/07/2025","C950300-55","ACOLCHADO VEGETAL","2.61"
+"5966301","22/07/2025","C950300-02","ACOLCHADO VEGETAL","3.15"
+"5966402","22/07/2025","C950300-33","ACOLCHADO VEGETAL","2.88"
+"5966503","23/07/2025","C950300-55","ACOLCHADO VEGETAL","3.22"
+"5966604","23/07/2025","C950300-02","ACOLCHADO VEGETAL","2.95"
+"5966705","24/07/2025","C950300-33","ACOLCHADO VEGETAL","3.41"
+"5966806","24/07/2025","C950300-55","ACOLCHADO VEGETAL","2.73"
+"5966907","25/07/2025","C950300-02","ACOLCHADO VEGETAL","3.08"
+"5967008","25/07/2025","C950300-33","ACOLCHADO VEGETAL","2.84"
+"5967109","26/07/2025","C950300-55","ACOLCHADO VEGETAL","3.56"
+"5967210","26/07/2025","C950300-02","ACOLCHADO VEGETAL","2.92"
+"5967311","27/07/2025","C950300-33","ACOLCHADO VEGETAL","3.17"
+"5967412","28/07/2025","C950300-55","ACOLCHADO VEGETAL","2.89"
+"5967513","29/07/2025","C950300-02","ACOLCHADO VEGETAL","3.33"
+"5967614","30/07/2025","C950300-33","ACOLCHADO VEGETAL","2.67"
+"5967715","31/07/2025","C950300-55","ACOLCHADO VEGETAL","3.24"
+"5967816","01/08/2025","C950300-02","ACOLCHADO VEGETAL","2.98"
+"5967917","02/08/2025","C950300-33","ACOLCHADO VEGETAL","3.45"
+"5968018","03/08/2025","C950300-55","ACOLCHADO VEGETAL","2.81"
+"5968119","04/08/2025","C950300-02","ACOLCHADO VEGETAL","3.12"
+"5968220","05/08/2025","C950300-33","ACOLCHADO VEGETAL","2.94"
+"5968321","06/08/2025","C950300-55","ACOLCHADO VEGETAL","3.29"
+"5968422","07/08/2025","C950300-02","ACOLCHADO VEGETAL","2.76"`;
+
+            parseCSVData(sampleCSV);
+        }
+    </script>
+                

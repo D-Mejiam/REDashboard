@@ -1,0 +1,3683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Mantenimiento - Simeprode</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px;
+        }
+
+        .logo:hover {
+            background-color: #f9fafb;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #dc2626;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        /* Platform Selector */
+        .platform-selector {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .platform-selector .logo {
+            margin-bottom: 0;
+        }
+
+        .platform-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .platform-selector:hover .platform-dropdown {
+            display: block;
+        }
+
+        .platform-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .platform-option:last-child {
+            border-bottom: none;
+        }
+
+        .platform-option:hover {
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .platform-option.active {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+
+        .platform-option-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .platform-option-icon.acolchado {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+
+        .platform-option-icon.mantenimiento {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .platform-option-icon.servicio-social {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .platform-option-text {
+            flex: 1;
+        }
+
+        .platform-option-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .platform-option-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .user-info {
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #16a34a;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+
+
+        /* Navigation */
+        .nav {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .nav-link.active {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border-right: 3px solid #dc2626;
+        }
+
+        /* New styles for collapsible sections and sub-items */
+        .nav-item-has-submenu .nav-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-item-has-submenu .nav-link .nav-arrow {
+            font-size: 12px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .nav-item-has-submenu.expanded .nav-link .nav-arrow {
+            transform: rotate(90deg);
+        }
+
+        .submenu {
+            list-style: none;
+            padding-left: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .submenu.expanded {
+            max-height: 500px; /* Adjust as needed to fit all items */
+        }
+
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 20px 8px 40px; /* Indent sub-items */
+            color: #4b5563;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 6px;
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+
+        .submenu-item:hover {
+            background-color: #f3f4f6;
+            color: #dc2626;
+        }
+
+        .submenu-item-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 16px;
+            color: #dc2626; /* Use the maintenance theme color */
+        }
+
+        .submenu-item-text {
+            flex-grow: 1;
+        }
+
+        .submenu-item-arrow {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        /* Vehicle Cards Styles (like Common workspaces) */
+        .vehicle-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 30px;
+        }
+
+        .vehicle-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vehicle-card:hover {
+            border-color: #dc2626;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .vehicle-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .vehicle-card-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .vehicle-card-count {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .vehicle-card-status {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
+        }
+
+        .status-count {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .status-count.due-soon {
+            color: #f59e0b;
+            background-color: #fef3c7;
+        }
+
+        .status-count.required {
+            color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+                            .status-count-icon {
+                        font-size: 10px;
+                        font-weight: bold;
+                    }
+                    .status-text {
+                        font-size: 10px;
+                        font-weight: 500;
+                        margin-left: 4px;
+                        color: #6b7280;
+                    }
+                    
+                    .status-count.due-soon .status-text {
+                        color: #f59e0b;
+                    }
+                    
+                    .status-count.required .status-text {
+                        color: #dc2626;
+                    }
+
+        .vehicle-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .vehicle-card-description {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+
+        .vehicle-card-arrow {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            font-size: 16px;
+            color: #9ca3af;
+            transition: all 0.2s ease;
+        }
+
+        .vehicle-card:hover .vehicle-card-arrow {
+            color: #dc2626;
+            transform: translateX(2px);
+        }
+
+        /* Individual Vehicles View Styles */
+        .vehicle-individual-view {
+            padding: 30px;
+        }
+
+        .vehicle-view-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+
+
+
+        /* Breadcrumbs Styles */
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .breadcrumb-item {
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        .breadcrumb-item:hover {
+            color: #dc2626;
+            background-color: #fef2f2;
+            transform: translateY(-1px);
+        }
+
+        .breadcrumb-item:active {
+            transform: translateY(0);
+        }
+
+        .breadcrumb-item.current {
+            color: #111827;
+            font-weight: 600;
+            cursor: default;
+        }
+
+        .breadcrumb-item.current:hover {
+            color: #111827;
+            background-color: transparent;
+        }
+
+        .breadcrumb-separator {
+            color: #d1d5db;
+            font-weight: 300;
+        }
+
+        /* Vehicle Detail Breadcrumbs */
+        #vehicle-detail .breadcrumbs {
+            margin-bottom: 0;
+        }
+
+        #vehicle-detail .breadcrumb-item {
+            font-size: 13px;
+        }
+
+        .vehicle-view-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .maintenance-summary {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .summary-icon {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .summary-icon.good {
+            color: #10b981;
+        }
+
+        .summary-icon.due-soon {
+            color: #f59e0b;
+        }
+
+        .summary-icon.required {
+            color: #dc2626;
+        }
+
+        .summary-label {
+            color: #6b7280;
+        }
+
+        .summary-count {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        /* Individual Vehicle Card Styles */
+        .vehicle-item-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vehicle-item-card:hover {
+            border-color: #dc2626;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .vehicle-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .vehicle-item-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .vehicle-item-statuses {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .status-indicator {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-indicator.good {
+            color: #10b981;
+        }
+
+        .status-indicator.due-soon {
+            color: #f59e0b;
+        }
+
+        .status-indicator.required {
+            color: #dc2626;
+        }
+
+        .vehicle-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .vehicle-item-details {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+
+
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 0;
+        }
+
+        .main-content.vehicle-detail-active {
+            width: 100%;
+            max-width: none;
+        }
+
+        .header {
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #f3f4f6;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .stat-icon.good { background-color: #16a34a; }
+        .stat-icon.due-soon { background-color: #f59e0b; }
+        .stat-icon.required { background-color: #dc2626; }
+        .stat-icon.total { background-color: #3b82f6; }
+
+        .stat-title {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            color: #6b7280;
+            margin-left: 4px;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            padding: 0 30px 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #f3f4f6;
+            margin-bottom: 20px;
+        }
+
+        .chart-container canvas {
+            max-height: 250px !important;
+        }
+
+        .chart-header {
+            margin-bottom: 24px;
+        }
+        .chart-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .chart-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* File Upload Section */
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            border: 2px dashed #d1d5db;
+            text-align: center;
+            margin: 30px;
+            transition: all 0.2s;
+        }
+
+        .upload-section:hover {
+            border-color: #dc2626;
+            background-color: #f9fafb;
+        }
+
+        .upload-section.dragover {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 24px;
+            color: #6b7280;
+        }
+
+        .upload-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .upload-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #f3f4f6;
+            overflow: hidden;
+            margin: 30px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background-color: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #6b7280;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-in-progress {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-completed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-overdue {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Logout */
+        .logout {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .logout-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout-link:hover {
+            color: #991b1b;
+        }
+
+        /* Chart Stats Styles */
+        .chart-stats {
+            display: flex;
+            gap: 20px;
+            margin: 12px 0 8px 0;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #f3f4f6;
+        }
+
+        /* Pending Maintenance Section Styles */
+        .pending-maintenance-section {
+            margin: 30px;
+        }
+
+        .section-header {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .priority-high {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-low {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .chart-stat-item {
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .chart-stat-item strong {
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .chart-stat-item span {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+        }
+        .toast {
+            min-width: 280px;
+            max-width: 420px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-left-width: 4px;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            padding: 12px 14px;
+            color: #374151;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: toast-in 200ms ease-out;
+            transition: opacity 150ms ease, transform 150ms ease;
+        }
+        .toast-success { border-left-color: #16a34a; }
+        .toast-error { border-left-color: #dc2626; }
+        .toast-message { flex: 1; font-size: 14px; line-height: 1.35; }
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0 2px;
+        }
+        .toast-close:hover { color: #6b7280; }
+        .toast.hide { opacity: 0; transform: translateX(8px); }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Hidden sections */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        #vehicle-detail.section.active {
+            width: 100%;
+            max-width: none;
+            display: block !important;
+        }
+
+        #vehicle-detail {
+            width: 100%;
+            max-width: none;
+        }
+
+
+
+        /* Facturas Section Styles */
+        .invoices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .upload-area {
+            background: white;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+        .upload-area.dragover {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .upload-area h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .upload-area p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .invoices-list {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .invoices-list h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 20px;
+        }
+
+        .invoices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .invoice-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .invoice-card:hover {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+        .invoice-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .invoice-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .invoice-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+            flex: 1;
+            margin-left: 12px;
+        }
+
+        .invoice-date {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .invoice-vehicle {
+            font-size: 12px;
+            color: #dc2626;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .invoice-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .invoice-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .invoice-btn.view {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .invoice-btn.view:hover {
+            background-color: #b91c1c;
+        }
+
+        .invoice-btn.delete {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .invoice-btn.delete:hover {
+            background-color: #e5e7eb;
+            color: #dc2626;
+        }
+
+        /* Vehicle Selection Modal */
+        .vehicle-selection-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+        }
+
+        .vehicle-selection-modal.active {
+            display: flex;
+        }
+
+        .vehicle-selection-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .vehicle-selection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .vehicle-selection-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .vehicle-selection-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .vehicle-selection-close:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .vehicle-selection-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-select {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Odometro Section Styles */
+        .odometro-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-top: 24px;
+        }
+
+        .odometro-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .odometro-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .odometro-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .odometro-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .odometro-table th {
+            background: #f9fafb;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        .odometro-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .odometro-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .odometro-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .vehicle-category {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .vehicle-name {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .odometer-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #059669;
+            background: #d1fae5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .hours-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #7c3aed;
+            background: #ede9fe;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .last-updated {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .update-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .update-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .update-btn:active {
+            transform: translateY(0);
+        }
+
+        .update-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Odometer input styles */
+        .odometer-input {
+            width: 100px;
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #f9fafb;
+            transition: border-color 0.2s;
+        }
+
+        .odometer-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .save-btn {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .save-btn:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+
+        .save-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Vehicle Detail Page Styles */
+        .vehicle-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+
+
+        .vehicle-detail-content {
+            padding: 30px;
+            width: 100%;
+        }
+
+        .vehicle-info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .vehicle-info-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .vehicle-info-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+        }
+
+        .vehicle-info-details h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+
+        .vehicle-info-details p {
+            font-size: 16px;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .vehicle-status-badges {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-badge.status-operational {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.status-active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .maintenance-status-section,
+        .vehicle-specs-section,
+        .maintenance-history-section,
+        .related-invoices-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .maintenance-status-section h3,
+        .vehicle-specs-section h3,
+        .maintenance-history-section h3,
+        .related-invoices-section h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 20px;
+        }
+
+        .maintenance-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .maintenance-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .maintenance-item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .maintenance-item-icon.good {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .maintenance-item-icon.due-soon {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .maintenance-item-icon.required {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .maintenance-item-details {
+            flex: 1;
+        }
+
+        .maintenance-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .maintenance-item-status {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .maintenance-item-status.good {
+            color: #166534;
+        }
+
+        .maintenance-item-status.due-soon {
+            color: #d97706;
+        }
+
+        .maintenance-item-status.required {
+            color: #dc2626;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .spec-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .spec-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .history-table-container {
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-table th {
+            background: #f9fafb;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .history-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .history-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .history-table .status-badge {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        .related-invoices-section .invoices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .related-invoices-section .invoice-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .related-invoices-section .invoice-card:hover {
+            border-color: #dc2626;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="platform-selector">
+                <div class="logo">
+                    <div class="logo-icon">🔧</div>
+                    <div>
+                        <div class="logo-text">Mantenimiento</div>
+                        <div class="logo-subtitle">Simeprode</div>
+                    </div>
+                </div>
+                <div class="platform-dropdown">
+                    <a href="index.html" class="platform-option">
+                        <div class="platform-option-icon acolchado">🌱</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Acolchado Vegetal</div>
+                            <div class="platform-option-subtitle">Control de consumo</div>
+                        </div>
+                    </a>
+                    <a href="mantenimiento.html" class="platform-option active">
+                        <div class="platform-option-icon mantenimiento">🔧</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Mantenimiento</div>
+                            <div class="platform-option-subtitle">Gestión de equipos</div>
+                        </div>
+                    </a>
+                    <a href="servicio-social.html" class="platform-option">
+                        <div class="platform-option-icon servicio-social">👥</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Servicio Social</div>
+                            <div class="platform-option-subtitle">Gestión de voluntarios</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar">M</div>
+                <div class="user-name">Mantenimiento</div>
+                <div class="user-role">Técnico</div>
+                <div class="user-status">
+                    <div class="status-dot"></div>
+                    <div class="status-text">Activo</div>
+                </div>
+            </div>
+
+            <nav>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="resumen">
+                            <div class="nav-icon">📊</div>
+                            Resumen
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="vehiculos">
+                            <div class="nav-icon">🚗</div>
+                            Vehiculos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="facturas">
+                            <div class="nav-icon">📄</div>
+                            Facturas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="odometro">
+                            <div class="nav-icon">📏</div>
+                            Odometro
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="reportes">
+                            <div class="nav-icon">📈</div>
+                            Reportes
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="logout">
+                <a href="#" class="logout-link">
+                    <div class="nav-icon">🚪</div>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Resumen Section -->
+            <div id="resumen" class="section active">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Control de Mantenimiento de Vehículos</h1>
+                        <p class="header-subtitle">Dashboard de mantenimiento de flota vehicular</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportData()">📥 Exportar</button>
+                        <button class="btn btn-primary" onclick="showSection('vehiculos')">🚗 Ver Vehículos</button>
+                    </div>
+                </header>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon good"></div>
+                            <div class="stat-title">Buen Estado</div>
+                        </div>
+                        <div class="stat-value" id="stat-good">45</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon due-soon"></div>
+                            <div class="stat-title">Vence Pronto</div>
+                        </div>
+                        <div class="stat-value" id="stat-due-soon">18</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon required"></div>
+                            <div class="stat-title">Pendiente</div>
+                        </div>
+                        <div class="stat-value" id="stat-required">12</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon total"></div>
+                            <div class="stat-title">Vehículos con Mantenimiento Pendiente</div>
+                        </div>
+                        <div class="stat-value" id="stat-total">75</div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="chart-section">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Estado de Mantenimiento</h2>
+                            <p class="chart-subtitle">Distribución de vehículos por estado de mantenimiento</p>
+                        </div>
+                        <canvas id="maintenanceStatusChart" width="400" height="120"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2 class="chart-title">Mantenimiento por Tipo de Vehículo</h2>
+                            <p class="chart-subtitle">Cantidad de mantenimientos requeridos por categoría</p>
+                        </div>
+                        <canvas id="vehicleMaintenanceChart" width="400" height="120"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pending Maintenance Summary Section -->
+                <div class="pending-maintenance-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Mantenimientos Pendientes - Top 10</h2>
+                        <p class="section-subtitle">Mantenimientos con estado "Pendiente" ordenados por tiempo de espera</p>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Posición</th>
+                                    <th>Vehículo</th>
+                                    <th>Categoría</th>
+                                    <th>Descripción del Mantenimiento</th>
+                                    <th>Fecha de Vencimiento</th>
+                                    <th>Días Pendiente</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-maintenance-table">
+                                <!-- Pending maintenance items will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+            <!-- Vehiculos Section -->
+            <div id="vehiculos" class="section">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Gestión de Vehículos</h1>
+                        <p class="header-subtitle">Administrar flota de vehículos y maquinaria</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportVehicles()">📥 Exportar</button>
+                        <button class="btn btn-primary" onclick="addNewVehicle()">➕ Nuevo Vehículo</button>
+                    </div>
+                </header>
+
+                <div id="vehicle-categories-view" class="vehicle-cards-grid">
+                    <div class="vehicle-card" onclick="showVehicleSection('vehiculos-ligeros')">
+                        <div class="vehicle-card-header">
+                            <div class="vehicle-card-icon">🚙</div>
+                            <div class="vehicle-card-count">3</div>
+                        </div>
+                        <div class="vehicle-card-title">Vehículos Ligeros de Transporte</div>
+                        <div class="vehicle-card-description">
+                            Gestión de automóviles, camionetas y vehículos de pasajeros para transporte de personal y materiales ligeros.
+                        </div>
+                        <div class="vehicle-card-status">
+                            <div class="status-count due-soon">
+                                <span class="status-count-icon">●</span>
+                                <span id="vehiculos-ligeros-due-soon">0</span>
+                                <span class="status-text">Vence pronto</span>
+                            </div>
+                            <div class="status-count required">
+                                <span class="status-count-icon">●</span>
+                                <span id="vehiculos-ligeros-required">0</span>
+                                <span class="status-text">Pendiente</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-card-arrow">→</div>
+                    </div>
+
+                    <div class="vehicle-card" onclick="showVehicleSection('vehiculos-trabajo')">
+                        <div class="vehicle-card-header">
+                            <div class="vehicle-card-icon">🚐</div>
+                            <div class="vehicle-card-count">6</div>
+                        </div>
+                        <div class="vehicle-card-title">Vehículos de Trabajo General</div>
+                        <div class="vehicle-card-description">
+                            Furgonetas, camiones pequeños y vehículos especializados para trabajos de campo y servicios generales.
+                        </div>
+                        <div class="vehicle-card-status">
+                            <div class="status-count due-soon">
+                                <span class="status-count-icon">●</span>
+                                <span id="vehiculos-trabajo-due-soon">0</span>
+                                <span class="status-text">Vence pronto</span>
+                            </div>
+                            <div class="status-count required">
+                                <span class="status-count-icon">●</span>
+                                <span id="vehiculos-trabajo-required">0</span>
+                                <span class="status-text">Pendiente</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-card-arrow">→</div>
+                    </div>
+
+                    <div class="vehicle-card" onclick="showVehicleSection('vehiculos-carga')">
+                        <div class="vehicle-card-header">
+                            <div class="vehicle-card-icon">🚛</div>
+                            <div class="vehicle-card-count">7</div>
+                        </div>
+                        <div class="vehicle-card-title">Vehículos de Carga Pesada</div>
+                        <div class="vehicle-card-description">
+                            Camiones de gran tonelaje, volquetes y vehículos especializados para transporte de materiales pesados.
+                        </div>
+                        <div class="vehicle-card-status">
+                            <div class="status-count due-soon">
+                                <span class="status-count-icon">●</span>
+                                <span id="vehiculos-carga-due-soon">0</span>
+                                <span class="status-text">Vence pronto</span>
+                            </div>
+                            <div class="status-count required">
+                                <span class="status-count-icon">●</span>
+                                <span id="vehiculos-carga-required">0</span>
+                                <span class="status-text">Pendiente</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-card-arrow">→</div>
+                    </div>
+
+                    <div class="vehicle-card" onclick="showVehicleSection('maquinaria-pesada')">
+                        <div class="vehicle-card-header">
+                            <div class="vehicle-card-icon">🚜</div>
+                            <div class="vehicle-card-count">10</div>
+                        </div>
+                        <div class="vehicle-card-title">Maquinaria Pesada</div>
+                        <div class="vehicle-card-description">
+                            Excavadoras, bulldozers, retroexcavadoras y maquinaria especializada para obras y proyectos de construcción.
+                        </div>
+                        <div class="vehicle-card-status">
+                            <div class="status-count due-soon">
+                                <span class="status-count-icon">●</span>
+                                <span id="maquinaria-pesada-due-soon">0</span>
+                                <span class="status-text">Vence pronto</span>
+                            </div>
+                            <div class="status-count required">
+                                <span class="status-count-icon">●</span>
+                                <span id="maquinaria-pesada-required">0</span>
+                                <span class="status-text">Pendiente</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-card-arrow">→</div>
+                    </div>
+
+                    <div class="vehicle-card" onclick="showVehicleSection('remolques')">
+                        <div class="vehicle-card-header">
+                            <div class="vehicle-card-icon">🚚</div>
+                            <div class="vehicle-card-count">5</div>
+                        </div>
+                        <div class="vehicle-card-title">Remolques y Plataformas</div>
+                        <div class="vehicle-card-description">
+                            Remolques, plataformas móviles y equipos de arrastre para transporte especializado y logística.
+                        </div>
+                        <div class="vehicle-card-status">
+                            <div class="status-count due-soon">
+                                <span class="status-count-icon">●</span>
+                                <span id="remolques-due-soon">0</span>
+                                <span class="status-text">Vence pronto</span>
+                            </div>
+                            <div class="status-count required">
+                                <span class="status-count-icon">●</span>
+                                <span id="remolques-required">0</span>
+                                <span class="status-text">Pendiente</span>
+                            </div>
+                        </div>
+                        <div class="vehicle-card-arrow">→</div>
+                    </div>
+                </div>
+
+                <!-- Individual Vehicles View -->
+                <div id="vehicle-individual-view" class="vehicle-individual-view" style="display: none;">
+                    <div class="vehicle-view-header">
+                        <div class="breadcrumbs" id="vehicle-breadcrumbs">
+                            <span class="breadcrumb-item" onclick="showVehicleCategories()">Vehículos</span>
+                            <span class="breadcrumb-separator">/</span>
+                            <span class="breadcrumb-item current" id="current-category">Categorías</span>
+                        </div>
+
+                    </div>
+                    <div id="vehicle-individual-grid" class="vehicle-cards-grid">
+                        <!-- Individual vehicle cards will be populated here -->
+                    </div>
+                    <div class="vehicle-view-footer">
+                        <div class="maintenance-summary">
+                            <div class="summary-item">
+                                <span class="summary-icon good">●</span>
+                                <span class="summary-label">Buen Estado:</span>
+                                <span id="individual-good-count" class="summary-count">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-icon due-soon">●</span>
+                                <span class="summary-label">Vence Pronto:</span>
+                                <span id="individual-due-soon-count" class="summary-count">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-icon required">●</span>
+                                <span class="summary-label">Pendiente:</span>
+                                <span id="individual-required-count" class="summary-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Facturas Section -->
+            <div id="facturas" class="section">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Gestión de Facturas</h1>
+                        <p class="header-subtitle">Administrar facturas e invoices relacionados con vehículos</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportInvoices()">📥 Exportar</button>
+                        <button class="btn btn-primary" onclick="uploadInvoice()">📄 Subir Factura</button>
+                    </div>
+                </header>
+
+                <div class="invoices-container">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📄</div>
+                        <h3>Subir Factura PDF</h3>
+                        <p>Arrastra y suelta archivos PDF aquí o haz clic para seleccionar</p>
+                        <input type="file" id="invoiceFileInput" accept=".pdf" style="display: none;" onchange="handleFileUpload(event)">
+                        <button class="btn btn-secondary" onclick="document.getElementById('invoiceFileInput').click()">Seleccionar Archivo</button>
+                    </div>
+
+                    <div class="invoices-list" id="invoicesList">
+                        <h3>Facturas Subidas</h3>
+                        <div class="invoices-grid" id="invoicesGrid">
+                            <!-- Invoices will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Odometro Section -->
+            <div id="odometro" class="section">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Control de Odómetro</h1>
+                        <p class="header-subtitle">Seguimiento de kilómetros y horas de uso de la flota vehicular</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportOdometerData()">📥 Exportar</button>
+                        <button class="btn btn-primary" onclick="updateAllOdometers()">🔄 Actualizar Todo</button>
+                    </div>
+                </header>
+
+                <div class="odometro-container">
+                    <div class="odometro-header">
+                        <h2 class="odometro-title">Registro de Kilómetros y Horas</h2>
+                        <div class="odometro-actions">
+                            <button class="btn btn-secondary" onclick="refreshOdometerData()">🔄 Refrescar</button>
+                        </div>
+                    </div>
+
+                    <table class="odometro-table">
+                        <thead>
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Vehículo</th>
+                                <th>Kilómetros</th>
+                                <th>Horas</th>
+                                <th>Última Actualización</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="odometerTableBody">
+                            <!-- Odometer data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reportes Section -->
+            <div id="reportes" class="section">
+                <header class="header">
+                    <div>
+                        <h1 class="header-title">Reportes de Mantenimiento</h1>
+                        <p class="header-subtitle">Generar reportes y análisis</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="generateReport()">📊 Generar Reporte</button>
+                        <button class="btn btn-primary" onclick="exportReport()">📥 Exportar PDF</button>
+                    </div>
+                </header>
+
+                <div class="upload-section" id="report-zone">
+                    <div class="upload-icon">📊</div>
+                    <h3 class="upload-title">Generador de Reportes</h3>
+                    <p class="upload-description">
+                        Selecciona el tipo de reporte y período para generar análisis detallados<br>
+                        de mantenimiento de vehículos
+                    </p>
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="generateMonthlyReport()">📅 Reporte Mensual</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vehicle Detail Section -->
+        <div id="vehicle-detail" class="section">
+            <header class="header">
+                <div class="vehicle-detail-header">
+                    <div class="breadcrumbs" id="vehicle-detail-breadcrumbs">
+                        <span class="breadcrumb-item" onclick="goBackToVehicles()">Vehículos</span>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-item" id="detail-category-breadcrumb">Categoría</span>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-item current" id="detail-vehicle-breadcrumb">Vehículo</span>
+                    </div>
+
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="editVehicle()">✏️ Editar</button>
+                    <button class="btn btn-primary" onclick="exportVehicleData()">📥 Exportar</button>
+                </div>
+            </header>
+
+            <div class="vehicle-detail-content">
+                <!-- Vehicle Info Card -->
+                <div class="vehicle-info-card">
+                    <div class="vehicle-info-header">
+                        <div class="vehicle-info-icon" id="detail-vehicle-icon-large">🚗</div>
+                        <div class="vehicle-info-details">
+                            <h2 id="detail-vehicle-name-large">Susuki 006</h2>
+                            <p id="detail-vehicle-category">Vehículos Ligeros de Transporte</p>
+                            <div class="vehicle-status-badges">
+                                <span class="status-badge status-operational">Operativo</span>
+                                <span class="status-badge status-active">Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Status Grid -->
+                <div class="maintenance-status-section">
+                    <h3>Estado de Mantenimiento</h3>
+                    <div class="maintenance-status-grid" id="maintenance-status-grid">
+                        <!-- Maintenance items will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Vehicle Specifications -->
+                <div class="vehicle-specs-section">
+                    <h3>Especificaciones del Vehículo</h3>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Marca:</span>
+                            <span class="spec-value" id="spec-brand">Suzuki</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Modelo:</span>
+                            <span class="spec-value" id="spec-model">Swift</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Año:</span>
+                            <span class="spec-value" id="spec-year">2020</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Placas:</span>
+                            <span class="spec-value" id="spec-plates">ABC-123</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Kilometraje:</span>
+                            <span class="spec-value" id="spec-odometer">45,230 km</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Horas de Uso:</span>
+                            <span class="spec-value" id="spec-hours">1,250 hrs</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Último Mantenimiento:</span>
+                            <span class="spec-value" id="spec-last-maintenance">15/01/2025</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Próximo Mantenimiento:</span>
+                            <span class="spec-value" id="spec-next-maintenance">15/02/2025</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance History -->
+                <div class="maintenance-history-section">
+                    <h3>Historial de Mantenimiento</h3>
+                    <div class="history-table-container">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Responsable</th>
+                                    <th>Costo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maintenance-history-tbody">
+                                <!-- History items will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Related Invoices -->
+                <div class="related-invoices-section">
+                    <h3>Facturas Relacionadas</h3>
+                    <div class="invoices-grid" id="related-invoices-grid">
+                        <!-- Related invoices will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Vehicle Selection Modal -->
+    <div id="vehicleSelectionModal" class="vehicle-selection-modal">
+        <div class="vehicle-selection-content">
+            <div class="vehicle-selection-header">
+                <div class="vehicle-selection-title">Relacionar Factura con Vehículo</div>
+                <button class="vehicle-selection-close" onclick="closeVehicleSelectionModal()">&times;</button>
+            </div>
+            <div class="vehicle-selection-form">
+                <div class="form-group">
+                    <label class="form-label">Archivo:</label>
+                    <div id="selectedFileName" style="padding: 10px; background: #f3f4f6; border-radius: 6px; font-size: 14px;"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Categoría de Vehículo:</label>
+                    <select id="vehicleCategorySelect" class="form-select" onchange="updateVehicleSelect()">
+                        <option value="">Seleccionar categoría</option>
+                        <option value="vehiculos-ligeros">Vehículos Ligeros de Transporte</option>
+                        <option value="vehiculos-trabajo">Vehículos de Trabajo General</option>
+                        <option value="vehiculos-carga">Vehículos de Carga Pesada</option>
+                        <option value="maquinaria-pesada">Maquinaria Pesada</option>
+                        <option value="remolques">Remolques y Plataformas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vehículo:</label>
+                    <select id="vehicleSelect" class="form-select">
+                        <option value="">Primero selecciona una categoría</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeVehicleSelectionModal()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="saveInvoiceVehicleRelation()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create toast container
+        (function ensureToastContainer(){
+            const existing = document.getElementById('toast-container');
+            if (!existing) {
+                const div = document.createElement('div');
+                div.id = 'toast-container';
+                div.className = 'toast-container';
+                document.addEventListener('DOMContentLoaded', () => document.body.appendChild(div));
+            }
+        })();
+
+        // Global variables
+        let maintenanceStatusChart = null;
+        let vehicleMaintenanceChart = null;
+
+        // Navigation function
+        function showSection(sectionName) {
+            console.log('Showing section:', sectionName);
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Update nav link
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const targetLink = document.querySelector(`[data-section="${sectionName}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+            
+            // Update pending maintenance table when resumen section is shown
+            if (sectionName === 'resumen') {
+                displayPendingMaintenanceTable();
+            }
+            
+            // Initialize odometer table when odometro section is shown
+            if (sectionName === 'odometro') {
+                displayOdometerTable();
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Get real data from vehicleData
+            const totalStats = calculateTotalMaintenanceStats();
+            const categoryStats = calculateCategoryMaintenanceStats();
+            
+            // Update stats cards with real data
+            document.getElementById('stat-good').textContent = totalStats.good;
+            document.getElementById('stat-due-soon').textContent = totalStats.dueSoon;
+            document.getElementById('stat-required').textContent = totalStats.required;
+            document.getElementById('stat-total').textContent = totalStats.total;
+            
+            // Maintenance status chart
+            const maintenanceStatusCanvas = document.getElementById('maintenanceStatusChart');
+            if (maintenanceStatusCanvas) {
+                const ctx = maintenanceStatusCanvas.getContext('2d');
+                maintenanceStatusChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Buen Estado', 'Vence Pronto', 'Pendiente'],
+                        datasets: [{
+                            data: [totalStats.good, totalStats.dueSoon, totalStats.required],
+                            backgroundColor: [
+                                '#16a34a',  // Green for good
+                                '#f59e0b',  // Orange for due soon
+                                '#dc2626'   // Red for required
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Vehicle maintenance chart
+            const vehicleMaintenanceCanvas = document.getElementById('vehicleMaintenanceChart');
+            if (vehicleMaintenanceCanvas) {
+                const ctx2 = vehicleMaintenanceCanvas.getContext('2d');
+                vehicleMaintenanceChart = new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Vehículos Ligeros', 'Trabajo General', 'Carga Pesada', 'Maquinaria Pesada', 'Remolques'],
+                        datasets: [{
+                            label: 'Pendiente',
+                            data: [
+                                categoryStats['vehiculos-ligeros'].required,
+                                categoryStats['vehiculos-trabajo'].required,
+                                categoryStats['vehiculos-carga'].required,
+                                categoryStats['maquinaria-pesada'].required,
+                                categoryStats['remolques'].required
+                            ],
+                            backgroundColor: 'rgba(220, 38, 38, 0.6)',
+                            borderColor: '#dc2626',
+                            borderWidth: 1
+                        }, {
+                            label: 'Vence Pronto',
+                            data: [
+                                categoryStats['vehiculos-ligeros'].dueSoon,
+                                categoryStats['vehiculos-trabajo'].dueSoon,
+                                categoryStats['vehiculos-carga'].dueSoon,
+                                categoryStats['maquinaria-pesada'].dueSoon,
+                                categoryStats['remolques'].dueSoon
+                            ],
+                            backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                            borderColor: '#f59e0b',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Cantidad de Mantenimientos'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Function to update charts with current data
+        function updateCharts() {
+            const totalStats = calculateTotalMaintenanceStats();
+            const categoryStats = calculateCategoryMaintenanceStats();
+            
+            // Update stats cards
+            document.getElementById('stat-good').textContent = totalStats.good;
+            document.getElementById('stat-due-soon').textContent = totalStats.dueSoon;
+            document.getElementById('stat-required').textContent = totalStats.required;
+            document.getElementById('stat-total').textContent = totalStats.total;
+            
+            // Update doughnut chart
+            if (maintenanceStatusChart) {
+                maintenanceStatusChart.data.datasets[0].data = [totalStats.good, totalStats.dueSoon, totalStats.required];
+                maintenanceStatusChart.update();
+            }
+            
+            // Update bar chart
+            if (vehicleMaintenanceChart) {
+                vehicleMaintenanceChart.data.datasets[0].data = [
+                    categoryStats['vehiculos-ligeros'].required,
+                    categoryStats['vehiculos-trabajo'].required,
+                    categoryStats['vehiculos-carga'].required,
+                    categoryStats['maquinaria-pesada'].required,
+                    categoryStats['remolques'].required
+                ];
+                vehicleMaintenanceChart.data.datasets[1].data = [
+                    categoryStats['vehiculos-ligeros'].dueSoon,
+                    categoryStats['vehiculos-trabajo'].dueSoon,
+                    categoryStats['vehiculos-carga'].dueSoon,
+                    categoryStats['maquinaria-pesada'].dueSoon,
+                    categoryStats['remolques'].dueSoon
+                ];
+                vehicleMaintenanceChart.update();
+            }
+        }
+
+        // Function to generate pending maintenance data
+        function generatePendingMaintenanceData() {
+            const pendingItems = [];
+            const maintenanceTypes = [
+                'Cambio de aceite',
+                'Revisión de frenos',
+                'Cambio de filtros',
+                'Revisión de neumáticos',
+                'Mantenimiento preventivo',
+                'Revisión de sistema eléctrico',
+                'Cambio de correas',
+                'Revisión de suspensión',
+                'Mantenimiento de motor',
+                'Revisión de transmisión'
+            ];
+
+            // Generate random dates for the last 30 days
+            const generateRandomDate = () => {
+                const now = new Date();
+                const daysAgo = Math.floor(Math.random() * 30) + 1;
+                const date = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
+                return date;
+            };
+
+            // Process all vehicles and their maintenance statuses
+            Object.keys(vehicleData).forEach(category => {
+                const data = vehicleData[category];
+                data.vehicles.forEach(vehicle => {
+                    vehicle.statuses.forEach((status, index) => {
+                        if (status === 'required') {
+                            const dueDate = generateRandomDate();
+                            const daysPending = Math.floor((new Date() - dueDate) / (1000 * 60 * 60 * 24));
+                            
+                            pendingItems.push({
+                                vehicle: vehicle.name,
+                                category: data.title,
+                                description: maintenanceTypes[index % maintenanceTypes.length],
+                                dueDate: dueDate,
+                                daysPending: daysPending
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Sort by days pending (descending) and return top 10
+            return pendingItems
+                .sort((a, b) => b.daysPending - a.daysPending)
+                .slice(0, 10);
+        }
+
+        // Function to display pending maintenance table
+        function displayPendingMaintenanceTable() {
+            const pendingItems = generatePendingMaintenanceData();
+            const tableBody = document.getElementById('pending-maintenance-table');
+            
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            pendingItems.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${item.vehicle}</strong></td>
+                    <td>${item.category}</td>
+                    <td>${item.description}</td>
+                    <td>${item.dueDate.toLocaleDateString('es-ES')}</td>
+                    <td><span class="status-badge ${item.daysPending > 20 ? 'status-overdue' : 'status-pending'}">${item.daysPending} días</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing maintenance dashboard...');
+            
+            // Initialize navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.getAttribute('data-section');
+                    if (section) {
+                        showSection(section);
+                    }
+                });
+            });
+
+
+
+            // Initialize charts
+            initializeCharts();
+            
+            // Initialize vehicle card status counts
+            updateVehicleCardStatusCounts();
+            
+            // Update charts to reflect current data
+            updateCharts();
+            
+            // Display pending maintenance table
+            displayPendingMaintenanceTable();
+        });
+
+        // Utility functions
+        function showToast(message, type = 'success', durationMs = 4000) {
+            const container = document.getElementById('toast-container') || (() => {
+                const div = document.createElement('div');
+                div.id = 'toast-container';
+                div.className = 'toast-container';
+                document.body.appendChild(div);
+                return div;
+            })();
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            const msg = document.createElement('div');
+            msg.className = 'toast-message';
+            msg.textContent = message;
+
+            const close = document.createElement('button');
+            close.className = 'toast-close';
+            close.innerHTML = '&times;';
+            close.addEventListener('click', () => removeToast(toast));
+
+            toast.appendChild(msg);
+            toast.appendChild(close);
+            container.appendChild(toast);
+
+            const ttl = Math.max(1500, durationMs);
+            setTimeout(() => removeToast(toast), ttl);
+        }
+
+        function removeToast(toastEl) {
+            if (!toastEl) return;
+            toastEl.classList.add('hide');
+            setTimeout(() => toastEl.remove(), 180);
+        }
+
+        // Action functions
+        function exportData() {
+            showToast('Exportando datos de mantenimiento...', 'success');
+        }
+
+
+
+        function generateReport() {
+            showToast('Generando reporte...', 'success');
+        }
+
+        function exportReport() {
+            showToast('Exportando reporte a PDF...', 'success');
+        }
+
+        function generateMonthlyReport() {
+            showToast('Generando reporte mensual...', 'success');
+        }
+
+
+
+        // Function to generate 5 random maintenance statuses for a vehicle
+        function getRandomStatuses() {
+            const statuses = [];
+            for (let i = 0; i < 5; i++) {
+                const random = Math.random();
+                if (random < 0.6) statuses.push('good');        // 60% chance of good status
+                else if (random < 0.8) statuses.push('due-soon');    // 20% chance of due soon
+                else statuses.push('required');                      // 20% chance of required
+            }
+            return statuses;
+        }
+
+        // Function to calculate total maintenance statistics from vehicle data
+        function calculateTotalMaintenanceStats() {
+            let totalGood = 0;
+            let totalDueSoon = 0;
+            let totalRequired = 0;
+            let vehiclesWithRequiredMaintenance = 0;
+            
+            // Aggregate data from all vehicle categories
+            Object.keys(vehicleData).forEach(category => {
+                const data = vehicleData[category];
+                data.vehicles.forEach(vehicle => {
+                    let vehicleHasRequired = false;
+                    vehicle.statuses.forEach(status => {
+                        switch(status) {
+                            case 'good':
+                                totalGood++;
+                                break;
+                            case 'due-soon':
+                                totalDueSoon++;
+                                break;
+                            case 'required':
+                                totalRequired++;
+                                vehicleHasRequired = true;
+                                break;
+                        }
+                    });
+                    // Count vehicles that have at least one "required" maintenance
+                    if (vehicleHasRequired) {
+                        vehiclesWithRequiredMaintenance++;
+                    }
+                });
+            });
+            
+            return {
+                good: totalGood,
+                dueSoon: totalDueSoon,
+                required: totalRequired,
+                total: vehiclesWithRequiredMaintenance
+            };
+        }
+
+        // Function to calculate maintenance stats by vehicle category
+        function calculateCategoryMaintenanceStats() {
+            const categoryStats = {};
+            
+            Object.keys(vehicleData).forEach(category => {
+                const data = vehicleData[category];
+                let dueSoonCount = 0;
+                let requiredCount = 0;
+                
+                data.vehicles.forEach(vehicle => {
+                    vehicle.statuses.forEach(status => {
+                        if (status === 'due-soon') {
+                            dueSoonCount++;
+                        } else if (status === 'required') {
+                            requiredCount++;
+                        }
+                    });
+                });
+                
+                categoryStats[category] = {
+                    dueSoon: dueSoonCount,
+                    required: requiredCount
+                };
+            });
+            
+            return categoryStats;
+        }
+
+        // Function to update vehicle card status counts
+        function updateVehicleCardStatusCounts() {
+            Object.keys(vehicleData).forEach(category => {
+                const data = vehicleData[category];
+                let dueSoonCount = 0;
+                let requiredCount = 0;
+
+                // Calculate cumulative status counts for this category
+                data.vehicles.forEach(vehicle => {
+                    vehicle.statuses.forEach(status => {
+                        if (status === 'due-soon') {
+                            dueSoonCount++;
+                        } else if (status === 'required') {
+                            requiredCount++;
+                        }
+                    });
+                });
+
+                // Update the display elements
+                const dueSoonElement = document.getElementById(`${category}-due-soon`);
+                const requiredElement = document.getElementById(`${category}-required`);
+                
+                if (dueSoonElement) {
+                    dueSoonElement.textContent = dueSoonCount;
+                }
+                if (requiredElement) {
+                    requiredElement.textContent = requiredCount;
+                }
+            });
+        }
+
+        // Vehicle data with 5 random maintenance statuses per vehicle
+        const vehicleData = {
+            'vehiculos-ligeros': {
+                title: 'Vehículos Ligeros de Transporte',
+                icon: '🚙',
+                vehicles: [
+                    { name: 'Susuki 006', statuses: getRandomStatuses(), details: 'Automóvil de pasajeros' },
+                    { name: 'Susuki 008', statuses: getRandomStatuses(), details: 'Automóvil de pasajeros' },
+                    { name: 'Susuki 009', statuses: getRandomStatuses(), details: 'Automóvil de pasajeros' }
+                ]
+            },
+            'vehiculos-trabajo': {
+                title: 'Vehículos de Trabajo General',
+                icon: '🚐',
+                vehicles: [
+                    { name: 'Chevrolet Silverado 001', statuses: getRandomStatuses(), details: 'Camioneta de trabajo' },
+                    { name: 'Chevrolet Silverado 002', statuses: getRandomStatuses(), details: 'Camioneta de trabajo' },
+                    { name: 'Chevrolet Silverado 004', statuses: getRandomStatuses(), details: 'Camioneta de trabajo' },
+                    { name: 'Chevrolet Silverado 005', statuses: getRandomStatuses(), details: 'Camioneta de trabajo' },
+                    { name: 'Chevrolet Silverado 007', statuses: getRandomStatuses(), details: 'Camioneta de trabajo' },
+                    { name: 'Ram 003', statuses: getRandomStatuses(), details: 'Camioneta de trabajo' }
+                ]
+            },
+            'vehiculos-carga': {
+                title: 'Vehículos de Carga Pesada',
+                icon: '🚛',
+                vehicles: [
+                    { name: 'Camion GT', statuses: getRandomStatuses(), details: 'Camión de carga' },
+                    { name: 'CF-001', statuses: getRandomStatuses(), details: 'Camión de carga' },
+                    { name: 'CF-002', statuses: getRandomStatuses(), details: 'Camión de carga' },
+                    { name: 'Foton', statuses: getRandomStatuses(), details: 'Camión de carga' },
+                    { name: 'HIno', statuses: getRandomStatuses(), details: 'Camión de carga' },
+                    { name: 'Pipa', statuses: getRandomStatuses(), details: 'Camión de carga' },
+                    { name: 'Camion Volteo', statuses: getRandomStatuses(), details: 'Camión de carga' }
+                ]
+            },
+            'maquinaria-pesada': {
+                title: 'Maquinaria Pesada',
+                icon: '🚜',
+                vehicles: [
+                    { name: 'A-01', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'A-02', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'Avant 750', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'Avant 850', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'Brazo Articulado Hino', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'Case', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'Destoconadora', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'Grua Telescopica', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'GT-5000', statuses: getRandomStatuses(), details: 'Maquinaria pesada' },
+                    { name: 'Retro', statuses: getRandomStatuses(), details: 'Maquinaria pesada' }
+                ]
+            },
+            'remolques': {
+                title: 'Remolques y Plataformas',
+                icon: '🚚',
+                vehicles: [
+                    { name: 'Re-01', statuses: getRandomStatuses(), details: 'Remolque' },
+                    { name: 'Re-02', statuses: getRandomStatuses(), details: 'Remolque' },
+                    { name: 'Re-03', statuses: getRandomStatuses(), details: 'Remolque' },
+                    { name: 'Re-04', statuses: getRandomStatuses(), details: 'Remolque' },
+                    { name: 'Re-05', statuses: getRandomStatuses(), details: 'Remolque' }
+                ]
+            }
+        };
+
+        // Vehicle functions
+        function showVehicleSection(vehicleType) {
+            const data = vehicleData[vehicleType];
+            if (!data) return;
+
+            // Hide all sections first (including detail page if active)
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show vehicles section
+            const vehiclesSection = document.getElementById('vehiculos');
+            if (vehiclesSection) {
+                vehiclesSection.classList.add('active');
+            }
+            
+            // Remove vehicle detail active class from main content
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.classList.remove('vehicle-detail-active');
+            }
+
+            // Hide categories view and show individual vehicles view
+            document.getElementById('vehicle-categories-view').style.display = 'none';
+            document.getElementById('vehicle-individual-view').style.display = 'block';
+
+            // Update breadcrumbs
+            updateBreadcrumbs('Vehículos', data.title);
+
+
+
+            // Populate individual vehicle grid
+            const grid = document.getElementById('vehicle-individual-grid');
+            grid.innerHTML = '';
+
+            // Count maintenance statuses
+            let goodCount = 0;
+            let dueSoonCount = 0;
+            let requiredCount = 0;
+
+            data.vehicles.forEach(vehicle => {
+                const vehicleItem = document.createElement('div');
+                vehicleItem.className = 'vehicle-item-card';
+                vehicleItem.onclick = () => showVehicleDetails(vehicle);
+                
+                // Filter only "due-soon" and "required" statuses
+                const filteredStatuses = vehicle.statuses.filter(status => 
+                    status === 'due-soon' || status === 'required'
+                );
+                
+                const statusIndicators = filteredStatuses.map(status => 
+                    `<span class="status-indicator ${status}">●</span>`
+                ).join('');
+                
+                vehicleItem.innerHTML = `
+                    <div class="vehicle-item-header">
+                        <div class="vehicle-item-icon">${data.icon}</div>
+                        <div class="vehicle-item-statuses">
+                            ${statusIndicators}
+                        </div>
+                    </div>
+                    <div class="vehicle-item-name">${vehicle.name}</div>
+                    <div class="vehicle-item-details">${vehicle.details}</div>
+                `;
+                
+                grid.appendChild(vehicleItem);
+
+                // Count all statuses for this vehicle
+                vehicle.statuses.forEach(status => {
+                    switch(status) {
+                        case 'good':
+                            goodCount++;
+                            break;
+                        case 'due-soon':
+                            dueSoonCount++;
+                            break;
+                        case 'required':
+                            requiredCount++;
+                            break;
+                    }
+                });
+            });
+
+            // Update maintenance summary counts
+            document.getElementById('individual-good-count').textContent = goodCount;
+            document.getElementById('individual-due-soon-count').textContent = dueSoonCount;
+            document.getElementById('individual-required-count').textContent = requiredCount;
+        }
+
+        function showVehicleCategories() {
+            // Hide individual vehicles view and show categories view
+            document.getElementById('vehicle-individual-view').style.display = 'none';
+            document.getElementById('vehicle-categories-view').style.display = 'grid';
+            
+            // Reset breadcrumbs to show only "Vehículos"
+            updateBreadcrumbs('Vehículos');
+        }
+
+
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'good': return 'Buen Estado';
+                case 'due-soon': return 'Vence Pronto';
+                case 'required': return 'Pendiente';
+                default: return 'Desconocido';
+            }
+        }
+
+        function updateBreadcrumbs(...items) {
+            // Try to find the appropriate breadcrumbs container
+            let breadcrumbsContainer = document.getElementById('vehicle-breadcrumbs');
+            if (!breadcrumbsContainer) {
+                breadcrumbsContainer = document.getElementById('vehicle-detail-breadcrumbs');
+            }
+            if (!breadcrumbsContainer) return;
+
+            breadcrumbsContainer.innerHTML = '';
+            
+            items.forEach((item, index) => {
+                if (index > 0) {
+                    const separator = document.createElement('span');
+                    separator.className = 'breadcrumb-separator';
+                    separator.textContent = '/';
+                    breadcrumbsContainer.appendChild(separator);
+                }
+                
+                const breadcrumbItem = document.createElement('span');
+                breadcrumbItem.className = index === items.length - 1 ? 'breadcrumb-item current' : 'breadcrumb-item';
+                breadcrumbItem.textContent = item;
+                
+                // Add click handlers for navigation
+                if (index === 0) {
+                    // "Vehículos" - always go back to main categories view
+                    breadcrumbItem.onclick = () => showVehicleCategories();
+                } else if (index === 1) {
+                    // Category name - go back to that specific category's vehicle list
+                    breadcrumbItem.onclick = () => {
+                        // Find the category key for this category name
+                        for (const [categoryKey, categoryData] of Object.entries(vehicleData)) {
+                            if (categoryData.title === item) {
+                                showVehicleSection(categoryKey);
+                                break;
+                            }
+                        }
+                    };
+                }
+                
+                breadcrumbsContainer.appendChild(breadcrumbItem);
+            });
+        }
+
+        function updateDetailBreadcrumbs(...items) {
+            const breadcrumbsContainer = document.getElementById('vehicle-detail-breadcrumbs');
+            if (!breadcrumbsContainer) return;
+
+            breadcrumbsContainer.innerHTML = '';
+            
+            items.forEach((item, index) => {
+                if (index > 0) {
+                    const separator = document.createElement('span');
+                    separator.className = 'breadcrumb-separator';
+                    separator.textContent = '/';
+                    breadcrumbsContainer.appendChild(separator);
+                }
+                
+                const breadcrumbItem = document.createElement('span');
+                breadcrumbItem.className = index === items.length - 1 ? 'breadcrumb-item current' : 'breadcrumb-item';
+                breadcrumbItem.textContent = item;
+                
+                // Add click handlers for navigation
+                if (index === 0) {
+                    // "Vehículos" - always go back to main categories view
+                    breadcrumbItem.onclick = () => {
+                        console.log('Clicking "Vehículos" breadcrumb - going to main categories');
+                        goBackToMainCategories();
+                    };
+                } else if (index === 1) {
+                    // Category name - go back to that specific category's vehicle list
+                    breadcrumbItem.onclick = () => {
+                        console.log('Clicking category breadcrumb:', item);
+                        // Find the category key for this category name
+                        for (const [categoryKey, categoryData] of Object.entries(vehicleData)) {
+                            if (categoryData.title === item) {
+                                console.log('Found category key:', categoryKey, 'for title:', item);
+                                showVehicleSection(categoryKey);
+                                break;
+                            }
+                        }
+                    };
+                }
+                
+                breadcrumbsContainer.appendChild(breadcrumbItem);
+            });
+        }
+
+        function showVehicleDetails(vehicle) {
+            // Hide all sections and show vehicle detail
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const detailSection = document.getElementById('vehicle-detail');
+            if (detailSection) {
+                detailSection.classList.add('active');
+            }
+            
+            // Add class to main content for full width
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.classList.add('vehicle-detail-active');
+            }
+            
+            // Update breadcrumbs for vehicle detail
+            const categoryName = getVehicleCategoryName(vehicle);
+            updateDetailBreadcrumbs('Vehículos', categoryName, vehicle.name);
+            
+            // Update detail page with vehicle information
+            populateVehicleDetail(vehicle);
+        }
+
+        function populateVehicleDetail(vehicle) {
+
+            document.getElementById('detail-vehicle-icon-large').textContent = '🚗';
+            document.getElementById('detail-vehicle-name-large').textContent = vehicle.name;
+            document.getElementById('detail-vehicle-category').textContent = getVehicleCategoryName(vehicle);
+            
+
+
+            // Populate maintenance status grid
+            populateMaintenanceStatus(vehicle);
+
+            // Populate vehicle specifications
+            populateVehicleSpecs(vehicle);
+
+            // Populate maintenance history
+            populateMaintenanceHistory(vehicle);
+
+            // Populate related invoices
+            populateRelatedInvoices(vehicle);
+        }
+
+        function getVehicleCategoryName(vehicle) {
+            // Find which category this vehicle belongs to
+            for (const [categoryKey, categoryData] of Object.entries(vehicleData)) {
+                if (categoryData.vehicles.some(v => v.name === vehicle.name)) {
+                    return categoryData.title;
+                }
+            }
+            return 'Vehículo';
+        }
+
+        function populateMaintenanceStatus(vehicle) {
+            const grid = document.getElementById('maintenance-status-grid');
+            grid.innerHTML = '';
+
+            const maintenanceTypes = [
+                { name: 'Cambio de Aceite', icon: '🛢️' },
+                { name: 'Filtros de Aire', icon: '💨' },
+                { name: 'Frenos', icon: '🛑' },
+                { name: 'Neumáticos', icon: '🛞' },
+                { name: 'Sistema Eléctrico', icon: '⚡' }
+            ];
+
+            vehicle.statuses.forEach((status, index) => {
+                const maintenanceType = maintenanceTypes[index] || { name: `Mantenimiento ${index + 1}`, icon: '🔧' };
+                
+                const item = document.createElement('div');
+                item.className = 'maintenance-item';
+                
+                item.innerHTML = `
+                    <div class="maintenance-item-icon ${status}">${maintenanceType.icon}</div>
+                    <div class="maintenance-item-details">
+                        <div class="maintenance-item-name">${maintenanceType.name}</div>
+                        <div class="maintenance-item-status ${status}">${getStatusText(status)}</div>
+                    </div>
+                `;
+                
+                grid.appendChild(item);
+            });
+        }
+
+        function populateVehicleSpecs(vehicle) {
+            // Mock specifications for Susuki 006
+            const specs = {
+                brand: 'Suzuki',
+                model: 'Swift',
+                year: '2020',
+                plates: 'ABC-123',
+                odometer: '45,230 km',
+                hours: '1,250 hrs',
+                lastMaintenance: '15/01/2025',
+                nextMaintenance: '15/02/2025'
+            };
+
+            document.getElementById('spec-brand').textContent = specs.brand;
+            document.getElementById('spec-model').textContent = specs.model;
+            document.getElementById('spec-year').textContent = specs.year;
+            document.getElementById('spec-plates').textContent = specs.plates;
+            document.getElementById('spec-odometer').textContent = specs.odometer;
+            document.getElementById('spec-hours').textContent = specs.hours;
+            document.getElementById('spec-last-maintenance').textContent = specs.lastMaintenance;
+            document.getElementById('spec-next-maintenance').textContent = specs.nextMaintenance;
+        }
+
+        function populateMaintenanceHistory(vehicle) {
+            const tbody = document.getElementById('maintenance-history-tbody');
+            tbody.innerHTML = '';
+
+            // Mock maintenance history
+            const history = [
+                {
+                    date: '15/01/2025',
+                    type: 'Preventivo',
+                    description: 'Cambio de aceite y filtros',
+                    status: 'Completado',
+                    responsible: 'Juan Pérez',
+                    cost: '$2,500'
+                },
+                {
+                    date: '10/12/2024',
+                    type: 'Correctivo',
+                    description: 'Reparación del sistema de frenos',
+                    status: 'Completado',
+                    responsible: 'Carlos López',
+                    cost: '$5,800'
+                },
+                {
+                    date: '25/11/2024',
+                    type: 'Preventivo',
+                    description: 'Revisión general y ajustes',
+                    status: 'Completado',
+                    responsible: 'María García',
+                    cost: '$1,200'
+                }
+            ];
+
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.type}</td>
+                    <td>${item.description}</td>
+                    <td><span class="status-badge status-completed">${item.status}</span></td>
+                    <td>${item.responsible}</td>
+                    <td>${item.cost}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function populateRelatedInvoices(vehicle) {
+            const grid = document.getElementById('related-invoices-grid');
+            grid.innerHTML = '';
+
+            // Filter invoices related to this vehicle
+            const relatedInvoices = uploadedInvoices.filter(invoice => invoice.vehicle === vehicle.name);
+
+            if (relatedInvoices.length === 0) {
+                grid.innerHTML = '<p style="color: #6b7280; text-align: center; grid-column: 1 / -1;">No hay facturas relacionadas</p>';
+                return;
+            }
+
+            relatedInvoices.forEach(invoice => {
+                const card = document.createElement('div');
+                card.className = 'invoice-card';
+                card.innerHTML = `
+                    <div class="invoice-header">
+                        <div class="invoice-icon">📄</div>
+                        <div class="invoice-name">${invoice.name}</div>
+                    </div>
+                    <div class="invoice-date">${invoice.date}</div>
+                    <div class="invoice-vehicle">${invoice.vehicle}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function goBackToVehicles() {
+            // Hide vehicle detail and show vehicles section
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const vehiclesSection = document.getElementById('vehiculos');
+            if (vehiclesSection) {
+                vehiclesSection.classList.add('active');
+            }
+            
+            // Remove class from main content
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.classList.remove('vehicle-detail-active');
+            }
+            
+            // Update nav link
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const vehiclesLink = document.querySelector('[data-section="vehiculos"]');
+            if (vehiclesLink) {
+                vehiclesLink.classList.add('active');
+            }
+            
+            // Reset breadcrumbs to show only "Vehículos"
+            updateBreadcrumbs('Vehículos');
+        }
+
+        function goBackToMainCategories() {
+            // Hide vehicle detail and show vehicles section
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const vehiclesSection = document.getElementById('vehiculos');
+            if (vehiclesSection) {
+                vehiclesSection.classList.add('active');
+            }
+            
+            // Remove class from main content
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.classList.remove('vehicle-detail-active');
+            }
+            
+            // Update nav link
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const vehiclesLink = document.querySelector('[data-section="vehiculos"]');
+            if (vehiclesLink) {
+                vehiclesLink.classList.add('active');
+            }
+            
+            // Show main categories view
+            showVehicleCategories();
+        }
+
+        function editVehicle() {
+            showToast('Función de edición en desarrollo...', 'info');
+        }
+
+        function exportVehicleData() {
+            showToast('Exportando datos del vehículo...', 'success');
+        }
+
+        function exportVehicles() {
+            showToast('Exportando datos de vehículos...', 'success');
+        }
+
+        function addNewVehicle() {
+            showToast('Agregando nuevo vehículo...', 'success');
+        }
+
+        // Facturas functions
+        let uploadedInvoices = [];
+        let currentUploadedFile = null;
+
+        function uploadInvoice() {
+            document.getElementById('invoiceFileInput').click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                showToast('Solo se permiten archivos PDF', 'error');
+                return;
+            }
+
+            currentUploadedFile = file;
+            showVehicleSelectionModal(file);
+        }
+
+        function showVehicleSelectionModal(file) {
+            document.getElementById('selectedFileName').textContent = file.name;
+            document.getElementById('vehicleSelectionModal').classList.add('active');
+        }
+
+        function closeVehicleSelectionModal() {
+            document.getElementById('vehicleSelectionModal').classList.remove('active');
+            document.getElementById('vehicleCategorySelect').value = '';
+            document.getElementById('vehicleSelect').innerHTML = '<option value="">Primero selecciona una categoría</option>';
+            currentUploadedFile = null;
+        }
+
+        function updateVehicleSelect() {
+            const category = document.getElementById('vehicleCategorySelect').value;
+            const vehicleSelect = document.getElementById('vehicleSelect');
+            
+            vehicleSelect.innerHTML = '<option value="">Seleccionar vehículo</option>';
+            
+            if (category && vehicleData[category]) {
+                vehicleData[category].vehicles.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.name;
+                    option.textContent = vehicle.name;
+                    vehicleSelect.appendChild(option);
+                });
+            }
+        }
+
+        function saveInvoiceVehicleRelation() {
+            const category = document.getElementById('vehicleCategorySelect').value;
+            const vehicle = document.getElementById('vehicleSelect').value;
+            
+            if (!category || !vehicle || !currentUploadedFile) {
+                showToast('Por favor completa todos los campos', 'error');
+                return;
+            }
+
+            const invoice = {
+                id: Date.now(),
+                name: currentUploadedFile.name,
+                date: new Date().toLocaleDateString('es-ES'),
+                vehicle: vehicle,
+                category: category,
+                file: currentUploadedFile
+            };
+
+            uploadedInvoices.push(invoice);
+            displayInvoices();
+            closeVehicleSelectionModal();
+            showToast('Factura relacionada exitosamente', 'success');
+        }
+
+        function displayInvoices() {
+            const grid = document.getElementById('invoicesGrid');
+            grid.innerHTML = '';
+
+            if (uploadedInvoices.length === 0) {
+                grid.innerHTML = '<p style="color: #6b7280; text-align: center; grid-column: 1 / -1;">No hay facturas subidas</p>';
+                return;
+            }
+
+            uploadedInvoices.forEach(invoice => {
+                const card = document.createElement('div');
+                card.className = 'invoice-card';
+                
+                card.innerHTML = `
+                    <div class="invoice-header">
+                        <div style="display: flex; align-items: center;">
+                            <div class="invoice-icon">📄</div>
+                            <div class="invoice-name">${invoice.name}</div>
+                        </div>
+                        <div class="invoice-date">${invoice.date}</div>
+                    </div>
+                    <div class="invoice-vehicle">Vehículo: ${invoice.vehicle}</div>
+                    <div class="invoice-actions">
+                        <button class="invoice-btn view" onclick="viewInvoice('${invoice.id}')">Ver</button>
+                        <button class="invoice-btn delete" onclick="deleteInvoice('${invoice.id}')">Eliminar</button>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function viewInvoice(invoiceId) {
+            const invoice = uploadedInvoices.find(inv => inv.id == invoiceId);
+            if (invoice) {
+                showToast(`Abriendo factura: ${invoice.name}`, 'success');
+                // Here you would typically open the PDF file
+            }
+        }
+
+        function deleteInvoice(invoiceId) {
+            uploadedInvoices = uploadedInvoices.filter(inv => inv.id != invoiceId);
+            displayInvoices();
+            showToast('Factura eliminada', 'success');
+        }
+
+        function exportInvoices() {
+            showToast('Exportando facturas...', 'success');
+        }
+
+        // Add drag and drop functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('invoiceFileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type === 'application/pdf') {
+                        currentUploadedFile = file;
+                        showVehicleSelectionModal(file);
+                    } else {
+                        showToast('Solo se permiten archivos PDF', 'error');
+                    }
+                }
+            });
+        });
+
+        // Odometer data structure
+        const odometerData = {
+            'vehiculos-ligeros': {
+                title: 'Vehículos Ligeros de Transporte',
+                vehicles: [
+                    { name: 'Susuki 006', kilometers: 125430, hours: 0, lastUpdated: '2024-01-15' },
+                    { name: 'Susuki 008', kilometers: 98750, hours: 0, lastUpdated: '2024-01-14' },
+                    { name: 'Susuki 009', kilometers: 156780, hours: 0, lastUpdated: '2024-01-16' }
+                ]
+            },
+            'vehiculos-trabajo': {
+                title: 'Vehículos de Trabajo General',
+                vehicles: [
+                    { name: 'Chevrolet Silverado 001', kilometers: 89000, hours: 0, lastUpdated: '2024-01-13' },
+                    { name: 'Chevrolet Silverado 002', kilometers: 112000, hours: 0, lastUpdated: '2024-01-12' },
+                    { name: 'Chevrolet Silverado 004', kilometers: 75000, hours: 0, lastUpdated: '2024-01-15' },
+                    { name: 'Chevrolet Silverado 005', kilometers: 134000, hours: 0, lastUpdated: '2024-01-14' },
+                    { name: 'Chevrolet Silverado 007', kilometers: 98000, hours: 0, lastUpdated: '2024-01-16' },
+                    { name: 'Ram 003', kilometers: 67000, hours: 0, lastUpdated: '2024-01-13' }
+                ]
+            },
+            'vehiculos-carga': {
+                title: 'Vehículos de Carga Pesada',
+                vehicles: [
+                    { name: 'Camion GT', kilometers: 234000, hours: 0, lastUpdated: '2024-01-15' },
+                    { name: 'CF-001', kilometers: 189000, hours: 0, lastUpdated: '2024-01-14' },
+                    { name: 'CF-002', kilometers: 156000, hours: 0, lastUpdated: '2024-01-16' },
+                    { name: 'Foton', kilometers: 278000, hours: 0, lastUpdated: '2024-01-13' },
+                    { name: 'HIno', kilometers: 198000, hours: 0, lastUpdated: '2024-01-15' },
+                    { name: 'Pipa', kilometers: 145000, hours: 0, lastUpdated: '2024-01-14' },
+                    { name: 'Camion Volteo', kilometers: 167000, hours: 0, lastUpdated: '2024-01-16' }
+                ]
+            },
+            'maquinaria-pesada': {
+                title: 'Maquinaria Pesada',
+                vehicles: [
+                    { name: 'A-01', kilometers: 0, hours: 2840, lastUpdated: '2024-01-15' },
+                    { name: 'A-02', kilometers: 0, hours: 3120, lastUpdated: '2024-01-14' },
+                    { name: 'Avant 750', kilometers: 0, hours: 1980, lastUpdated: '2024-01-16' },
+                    { name: 'Avant 850', kilometers: 0, hours: 2240, lastUpdated: '2024-01-13' },
+                    { name: 'Brazo Articulado Hino', kilometers: 0, hours: 3560, lastUpdated: '2024-01-15' },
+                    { name: 'Case', kilometers: 0, hours: 2780, lastUpdated: '2024-01-14' },
+                    { name: 'Destoconadora', kilometers: 0, hours: 1890, lastUpdated: '2024-01-16' },
+                    { name: 'Grua Telescopica', kilometers: 0, hours: 2340, lastUpdated: '2024-01-13' },
+                    { name: 'GT-5000', kilometers: 0, hours: 2980, lastUpdated: '2024-01-15' },
+                    { name: 'Retro', kilometers: 0, hours: 2670, lastUpdated: '2024-01-14' }
+                ]
+            },
+            'remolques': {
+                title: 'Remolques y Plataformas',
+                vehicles: [
+                    { name: 'Re-01', kilometers: 89000, hours: 0, lastUpdated: '2024-01-15' },
+                    { name: 'Re-02', kilometers: 67000, hours: 0, lastUpdated: '2024-01-14' },
+                    { name: 'Re-03', kilometers: 112000, hours: 0, lastUpdated: '2024-01-16' },
+                    { name: 'Re-04', kilometers: 78000, hours: 0, lastUpdated: '2024-01-13' },
+                    { name: 'Re-05', kilometers: 95000, hours: 0, lastUpdated: '2024-01-15' }
+                ]
+            }
+        };
+
+        // Odometer functions
+        function displayOdometerTable() {
+            const tableBody = document.getElementById('odometerTableBody');
+            tableBody.innerHTML = '';
+
+            Object.keys(odometerData).forEach(category => {
+                const categoryData = odometerData[category];
+                
+                categoryData.vehicles.forEach(vehicle => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-category', category);
+                    row.setAttribute('data-vehicle', vehicle.name);
+                    
+                    const kilometersDisplay = vehicle.kilometers > 0 ? 
+                        `<span class="odometer-value">${vehicle.kilometers.toLocaleString()} km</span>` : 
+                        '<span style="color: #9ca3af;">-</span>';
+                    
+                    const hoursDisplay = vehicle.hours > 0 ? 
+                        `<span class="hours-value">${vehicle.hours.toLocaleString()} hrs</span>` : 
+                        '<span style="color: #9ca3af;">-</span>';
+                    
+                    row.innerHTML = `
+                        <td class="vehicle-category">${categoryData.title}</td>
+                        <td class="vehicle-name">${vehicle.name}</td>
+                        <td class="kilometers-cell">${kilometersDisplay}</td>
+                        <td class="hours-cell">${hoursDisplay}</td>
+                        <td class="last-updated">${vehicle.lastUpdated}</td>
+                        <td>
+                            <button class="update-btn" onclick="startEditOdometer('${category}', '${vehicle.name}')">
+                                Actualizar
+                            </button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            });
+        }
+
+        function startEditOdometer(category, vehicleName) {
+            const row = document.querySelector(`tr[data-category="${category}"][data-vehicle="${vehicleName}"]`);
+            if (!row) return;
+
+            const categoryData = odometerData[category];
+            const vehicle = categoryData.vehicles.find(v => v.name === vehicleName);
+            if (!vehicle) return;
+
+            // Get the cells
+            const kilometersCell = row.querySelector('.kilometers-cell');
+            const hoursCell = row.querySelector('.hours-cell');
+            const actionCell = row.querySelector('td:last-child');
+
+            // Create input fields
+            const kilometersInput = document.createElement('input');
+            kilometersInput.type = 'number';
+            kilometersInput.value = vehicle.kilometers || 0;
+            kilometersInput.className = 'odometer-input';
+
+            const hoursInput = document.createElement('input');
+            hoursInput.type = 'number';
+            hoursInput.value = vehicle.hours || 0;
+            hoursInput.className = 'odometer-input';
+
+            // Replace the display with inputs
+            kilometersCell.innerHTML = '';
+            kilometersCell.appendChild(kilometersInput);
+            
+            hoursCell.innerHTML = '';
+            hoursCell.appendChild(hoursInput);
+
+            // Replace the update button with save button
+            actionCell.innerHTML = `
+                <button class="save-btn" onclick="saveOdometerData('${category}', '${vehicleName}')">
+                    Guardar
+                </button>
+            `;
+
+            // Focus on the first input
+            kilometersInput.focus();
+        }
+
+        function saveOdometerData(category, vehicleName) {
+            const row = document.querySelector(`tr[data-category="${category}"][data-vehicle="${vehicleName}"]`);
+            if (!row) return;
+
+            const categoryData = odometerData[category];
+            const vehicle = categoryData.vehicles.find(v => v.name === vehicleName);
+            if (!vehicle) return;
+
+            // Get input values
+            const kilometersInput = row.querySelector('.kilometers-cell input');
+            const hoursInput = row.querySelector('.hours-cell input');
+
+            if (!kilometersInput || !hoursInput) return;
+
+            const newKilometers = parseInt(kilometersInput.value) || 0;
+            const newHours = parseInt(hoursInput.value) || 0;
+
+            // Check if data has actually changed
+            const kilometersChanged = vehicle.kilometers !== newKilometers;
+            const hoursChanged = vehicle.hours !== newHours;
+            const dataChanged = kilometersChanged || hoursChanged;
+
+            // Update the data
+            vehicle.kilometers = newKilometers;
+            vehicle.hours = newHours;
+            
+            // Only update the last updated date if data actually changed
+            if (dataChanged) {
+                vehicle.lastUpdated = new Date().toISOString().split('T')[0];
+            }
+
+            // Refresh the table to show updated values
+            displayOdometerTable();
+            
+            if (dataChanged) {
+                showToast(`Odómetro actualizado para ${vehicleName}`, 'success');
+            } else {
+                showToast(`No se detectaron cambios en ${vehicleName}`, 'info');
+            }
+        }
+
+
+
+        function updateAllOdometers() {
+            Object.keys(odometerData).forEach(category => {
+                const categoryData = odometerData[category];
+                categoryData.vehicles.forEach(vehicle => {
+                    if (vehicle.kilometers > 0) {
+                        const increment = Math.floor(Math.random() * 500) + 50;
+                        vehicle.kilometers += increment;
+                    } else if (vehicle.hours > 0) {
+                        const increment = Math.floor(Math.random() * 25) + 5;
+                        vehicle.hours += increment;
+                    }
+                    vehicle.lastUpdated = new Date().toISOString().split('T')[0];
+                });
+            });
+            
+            displayOdometerTable();
+            showToast('Todos los odómetros han sido actualizados', 'success');
+        }
+
+        function refreshOdometerData() {
+            displayOdometerTable();
+            showToast('Datos de odómetro refrescados', 'success');
+        }
+
+        function exportOdometerData() {
+            showToast('Exportando datos de odómetro...', 'success');
+        }
+
+
+    </script>
+</body>
+</html>
