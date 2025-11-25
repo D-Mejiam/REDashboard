@@ -150,6 +150,10 @@
             background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
 
+        .platform-option-icon.inventario {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
         .platform-option-text {
             flex: 1;
         }
@@ -424,6 +428,8 @@
             padding: 24px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid #e5e7eb;
+            height: 300px;
+            position: relative;
         }
 
         .chart-header {
@@ -442,6 +448,219 @@
             color: #6b7280;
         }
 
+        .chart-container canvas {
+            max-height: 200px !important;
+            width: 100% !important;
+        }
+
+        /* Google Sheets-like Table Filters */
+        .filterable-header {
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filterable-header:hover {
+            background-color: #f3f4f6;
+        }
+
+        .filter-icon {
+            margin-left: 8px;
+            font-size: 12px;
+            color: #9ca3af;
+            transition: color 0.2s;
+        }
+
+        .filterable-header:hover .filter-icon {
+            color: #6b7280;
+        }
+
+        .filterable-header.has-filter .filter-icon {
+            color: #3b82f6;
+        }
+
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 200px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            margin-top: 4px;
+            max-height: 300px;
+            flex-direction: column;
+        }
+
+        .filter-dropdown.dropdown-up {
+            top: auto;
+            bottom: 100%;
+            margin-top: 0;
+            margin-bottom: 4px;
+        }
+
+        .filter-dropdown.show {
+            display: flex;
+        }
+
+        .filter-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .filter-title {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .filter-content {
+            padding: 12px 16px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+
+        .filter-search {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .filter-search:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-options {
+            overflow-y: auto;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .filter-option:hover {
+            background-color: #f3f4f6;
+        }
+
+        .filter-option input[type="checkbox"] {
+            margin-right: 8px;
+            accent-color: #3b82f6;
+        }
+
+        .filter-option label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            flex: 1;
+        }
+
+        .filter-actions {
+            padding: 12px 16px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-radius: 0 0 8px 8px;
+            flex-shrink: 0;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .sort-btn {
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .sort-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .sort-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.clear {
+            background: white;
+            color: #6b7280;
+        }
+
+        .filter-btn.clear:hover {
+            background: #f9fafb;
+        }
+
+        .filter-btn.apply {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .filter-btn.apply:hover {
+            background: #2563eb;
+        }
+
+        .filter-btn.apply:disabled {
+            background: #9ca3af;
+            border-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .active-filter-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 6px;
+            height: 6px;
+            background: #3b82f6;
+            border-radius: 50%;
+        }
+
         /* Sections */
         .section {
             display: none;
@@ -455,9 +674,10 @@
         .table-container {
             background: white;
             border-radius: 12px;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             border: 1px solid #e5e7eb;
+            position: relative;
         }
 
         .table {
@@ -1142,6 +1362,13 @@
                             <div class="platform-option-subtitle">Gestión de voluntarios</div>
                         </div>
                     </a>
+                    <a href="inventario.html" class="platform-option">
+                        <div class="platform-option-icon inventario">📦</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Inventario Activos</div>
+                            <div class="platform-option-subtitle">Control por camioneta</div>
+                        </div>
+                    </a>
                 </div>
             </div>
             
@@ -1220,7 +1447,7 @@
                             <div class="stat-icon active"></div>
                             <div class="stat-title">Alumnos Activos</div>
                         </div>
-                        <div class="stat-value" id="stat-active">45</div>
+                        <div class="stat-value" id="stat-active">9</div>
                     </div>
                     
                     <div class="stat-card">
@@ -1228,15 +1455,15 @@
                             <div class="stat-icon completed"></div>
                             <div class="stat-title">Horas Completadas</div>
                         </div>
-                        <div class="stat-value" id="stat-completed">1,247<span class="stat-unit">hrs</span></div>
+                        <div class="stat-value" id="stat-completed">1,410<span class="stat-unit">hrs</span></div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-icon pending"></div>
-                            <div class="stat-title">Horas Pendientes</div>
+                            <div class="stat-title">Por Graduarse Pronto</div>
                         </div>
-                        <div class="stat-value" id="stat-pending">753<span class="stat-unit">hrs</span></div>
+                        <div class="stat-value" id="stat-graduating">0<span class="stat-unit">alumnos</span></div>
                     </div>
                     
                     <div class="stat-card">
@@ -1244,7 +1471,7 @@
                             <div class="stat-icon total"></div>
                             <div class="stat-title">Meta Total</div>
                         </div>
-                        <div class="stat-value" id="stat-total">2,000<span class="stat-unit">hrs</span></div>
+                        <div class="stat-value" id="stat-total">4,320<span class="stat-unit">hrs</span></div>
                     </div>
                 </div>
 
@@ -1255,15 +1482,7 @@
                             <h2 class="chart-title">Progreso de Horas por Alumno</h2>
                             <p class="chart-subtitle">Comparación del progreso hacia la meta individual</p>
                         </div>
-                        <canvas id="progressChart" width="400" height="200"></canvas>
-                    </div>
-
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h2 class="chart-title">Estado de Completado</h2>
-                            <p class="chart-subtitle">Distribución de alumnos por estado de progreso</p>
-                        </div>
-                        <canvas id="statusChart" width="400" height="200"></canvas>
+                        <canvas id="progressChart" width="400" height="150"></canvas>
                     </div>
                 </div>
 
@@ -1286,23 +1505,23 @@
                         </thead>
                         <tbody id="recent-activities-table">
                             <tr>
-                                <td>María González</td>
-                                <td>Limpieza de Parques</td>
+                                <td>Eugenio Mijares</td>
+                                <td>Limpieza de Áreas Verdes</td>
                                 <td>4 hrs</td>
                                 <td>15/01/2025</td>
                                 <td>Servicio</td>
                                 <td><span class="status-badge status-completed">Completado</span></td>
                             </tr>
                             <tr>
-                                <td>Carlos Rodríguez</td>
-                                <td>Apoyo Educativo</td>
+                                <td>Sebastián González Alfaro</td>
+                                <td>Apoyo en Mantenimiento</td>
                                 <td>3 hrs</td>
                                 <td>14/01/2025</td>
                                 <td>Servicio</td>
                                 <td><span class="status-badge status-active">En curso</span></td>
                             </tr>
                             <tr>
-                                <td>Ana Martínez</td>
+                                <td>Paula Cantu Ceniceros</td>
                                 <td>Bono por Excelencia</td>
                                 <td>+2 hrs</td>
                                 <td>13/01/2025</td>
@@ -1310,12 +1529,12 @@
                                 <td><span class="status-badge status-completed">Aplicado</span></td>
                             </tr>
                             <tr>
-                                <td>Luis Pérez</td>
-                                <td>Sanción por Tardanza</td>
-                                <td>-1 hr</td>
+                                <td>Diego De La Garza Fernández</td>
+                                <td>Capacitación de Seguridad</td>
+                                <td>2 hrs</td>
                                 <td>12/01/2025</td>
-                                <td>Sanción</td>
-                                <td><span class="status-badge status-pending">Aplicada</span></td>
+                                <td>Capacitación</td>
+                                <td><span class="status-badge status-completed">Completado</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -1336,75 +1555,407 @@
                 </header>
 
                 <div class="table-container">
-                    <table class="table">
+                    <table class="table" id="students-table-main">
                         <thead>
                             <tr>
-                                <th>Matrícula</th>
-                                <th>Nombre</th>
-                                <th>Universidad</th>
-                                <th>Fecha Inicio</th>
-                                <th>Horas Acumuladas</th>
-                                <th>Meta de Horas</th>
-                                <th>Progreso</th>
-                                <th>Estado</th>
+                                <th class="filterable-header" data-column="matricula">
+                                    Matrícula
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Matrícula</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar matrícula...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="filterable-header" data-column="nombre">
+                                    Nombre
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Nombre</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar nombre...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="filterable-header" data-column="universidad">
+                                    Universidad
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Universidad</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar universidad...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="filterable-header" data-column="fecha">
+                                    Fecha Inicio
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Fecha</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar fecha...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="filterable-header" data-column="horas">
+                                    Horas Acumuladas
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Horas</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar horas...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="filterable-header" data-column="meta">
+                                    Meta de Horas
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Meta</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar meta...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="filterable-header" data-column="progreso">
+                                    Progreso
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Progreso</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar progreso...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="filterable-header" data-column="estado">
+                                    Estado
+                                    <span class="filter-icon">🔽</span>
+                                    <div class="active-filter-indicator" style="display: none;"></div>
+                                    <div class="filter-dropdown">
+                                        <div class="filter-header">
+                                            <div class="filter-title">Filtrar por Estado</div>
+                                        </div>
+                                        <div class="filter-content">
+                                            <input type="text" class="filter-search" placeholder="Buscar estado...">
+                                            <div class="filter-options"></div>
+                                        </div>
+                                        <div class="filter-actions">
+                                            <div class="sort-controls">
+                                                <span style="font-size: 11px; color: #6b7280; margin-right: 4px;">Ordenar:</span>
+                                                <button class="sort-btn sort-asc" data-sort="asc">
+                                                    <span>↑</span> Asc
+                                                </button>
+                                                <button class="sort-btn sort-desc" data-sort="desc">
+                                                    <span>↓</span> Desc
+                                                </button>
+                                            </div>
+                                            <div class="filter-buttons">
+                                                <button class="filter-btn clear">Limpiar</button>
+                                                <button class="filter-btn apply">Aplicar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="students-table">
-                                                         <tr>
-                                 <td>2023001</td>
-                                 <td>María González</td>
-                                 <td>UNAM</td>
-                                 <td>01/09/2024</td>
-                                 <td>320 hrs</td>
-                                 <td>480 hrs</td>
-                                 <td>
-                                     <div class="progress-bar">
-                                         <div class="progress-fill" style="width: 67%"></div>
-                                     </div>
-                                     <span style="font-size: 12px; color: #6b7280;">67%</span>
-                                 </td>
-                                 <td><span class="status-badge status-active">Activo</span></td>
-                                 <td>
-                                     <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('2023001')">Ver Historial</button>
-                                 </td>
-                             </tr>
-                             <tr>
-                                 <td>2023002</td>
-                                 <td>Carlos Rodríguez</td>
-                                 <td>IPN</td>
-                                 <td>15/08/2024</td>
-                                 <td>180 hrs</td>
-                                 <td>240 hrs</td>
-                                 <td>
-                                     <div class="progress-bar">
-                                         <div class="progress-fill" style="width: 75%"></div>
-                                     </div>
-                                     <span style="font-size: 12px; color: #6b7280;">75%</span>
-                                 </td>
-                                 <td><span class="status-badge status-active">Activo</span></td>
-                                 <td>
-                                     <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('2023002')">Ver Historial</button>
-                                 </td>
-                             </tr>
-                             <tr>
-                                 <td>2023003</td>
-                                 <td>Ana Martínez</td>
-                                 <td>UAM</td>
-                                 <td>20/09/2024</td>
-                                 <td>120 hrs</td>
-                                 <td>240 hrs</td>
-                                 <td>
-                                     <div class="progress-bar">
-                                         <div class="progress-fill" style="width: 50%"></div>
-                                     </div>
-                                     <span style="font-size: 12px; color: #6b7280;">50%</span>
-                                 </td>
-                                 <td><span class="status-badge status-active">Activo</span></td>
-                                 <td>
-                                     <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('2023003')">Ver Historial</button>
-                                 </td>
-                             </tr>
+                            <tr>
+                                <td>633059</td>
+                                <td>Eugenio Mijares</td>
+                                <td>UDEM</td>
+                                <td>01/09/2024</td>
+                                <td>267:40 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 56%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">56%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('633059')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>595002</td>
+                                <td>Sebastián González Alfaro</td>
+                                <td>UDEM</td>
+                                <td>15/08/2024</td>
+                                <td>194:00 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 40%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">40%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('595002')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>609847</td>
+                                <td>Diego De La Garza Fernández</td>
+                                <td>UDEM</td>
+                                <td>20/09/2024</td>
+                                <td>53:15 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 11%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">11%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('609847')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>638219</td>
+                                <td>Manuel Eugenio Aguirre Leal</td>
+                                <td>UDEM</td>
+                                <td>01/10/2024</td>
+                                <td>100:30 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 21%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">21%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('638219')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>599678</td>
+                                <td>Diana Ruanova Cavazos</td>
+                                <td>UDEM</td>
+                                <td>15/09/2024</td>
+                                <td>184:30 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 38%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">38%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('599678')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>597186</td>
+                                <td>Mauricio Alexis Tinajero Bobadilla</td>
+                                <td>UDEM</td>
+                                <td>20/10/2024</td>
+                                <td>121:00 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 25%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">25%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('597186')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>612605</td>
+                                <td>Paula Cantu Ceniceros</td>
+                                <td>UDEM</td>
+                                <td>01/11/2024</td>
+                                <td>223:00 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 46%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">46%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('612605')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>629808</td>
+                                <td>Luis Carlos Herrera</td>
+                                <td>UDEM</td>
+                                <td>15/11/2024</td>
+                                <td>219:00 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 46%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">46%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('629808')">Ver Historial</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>636082</td>
+                                <td>Jorge Garcia</td>
+                                <td>UDEM</td>
+                                <td>01/12/2024</td>
+                                <td>48:00 hrs</td>
+                                <td>480 hrs</td>
+                                <td>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 10%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; color: #6b7280;">10%</span>
+                                </td>
+                                <td><span class="status-badge status-active">Activo</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="viewStudentHistory('636082')">Ver Historial</button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1441,8 +1992,8 @@
                         <tbody id="bonuses-table">
                             <tr>
                                 <td>B001</td>
-                                <td>María González</td>
-                                <td>2023001</td>
+                                <td>Paula Cantu Ceniceros</td>
+                                <td>612605</td>
                                 <td>Excelencia en Servicio</td>
                                 <td>+2 hrs</td>
                                 <td>13/01/2025</td>
@@ -1454,8 +2005,8 @@
                             </tr>
                             <tr>
                                 <td>B002</td>
-                                <td>Carlos Rodríguez</td>
-                                <td>2023002</td>
+                                <td>Eugenio Mijares</td>
+                                <td>633059</td>
                                 <td>Liderazgo en Proyecto</td>
                                 <td>+3 hrs</td>
                                 <td>10/01/2025</td>
@@ -1467,8 +2018,8 @@
                             </tr>
                             <tr>
                                 <td>B003</td>
-                                <td>Ana Martínez</td>
-                                <td>2023003</td>
+                                <td>Sebastián González Alfaro</td>
+                                <td>595002</td>
                                 <td>Participación Extraordinaria</td>
                                 <td>+1 hr</td>
                                 <td>08/01/2025</td>
@@ -1722,16 +2273,16 @@
             new Chart(progressCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['María G.', 'Carlos R.', 'Ana M.', 'Luis P.', 'Juan D.'],
+                    labels: ['Eugenio M.', 'Sebastián G.', 'Diego D.L.G.', 'Manuel A.', 'Diana R.', 'Mauricio T.', 'Paula C.', 'Luis C.H.', 'Jorge G.'],
                     datasets: [{
                         label: 'Horas Completadas',
-                        data: [320, 180, 120, 400, 95],
+                        data: [267.67, 194, 53.25, 100.5, 184.5, 121, 223, 219, 48],
                         backgroundColor: '#3b82f6',
                         borderColor: '#2563eb',
                         borderWidth: 1
                     }, {
                         label: 'Horas Restantes',
-                        data: [160, 60, 120, 80, 145],
+                        data: [212.33, 286, 426.75, 379.5, 295.5, 359, 257, 261, 432],
                         backgroundColor: '#f3f4f6',
                         borderColor: '#d1d5db',
                         borderWidth: 1
@@ -1739,52 +2290,30 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'top'
                         }
                     },
-                                         scales: {
-                         x: {
-                             stacked: true
-                         },
-                         y: {
-                             stacked: true,
-                             beginAtZero: true,
-                             max: 500,
-                             title: {
-                                 display: true,
-                                 text: 'Horas'
-                             }
-                         }
-                     }
-                }
-            });
-
-            // Status Chart
-            const statusCtx = document.getElementById('statusChart').getContext('2d');
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completado', 'En Progreso', 'Pendiente'],
-                    datasets: [{
-                        data: [12, 25, 8],
-                        backgroundColor: [
-                            '#16a34a',
-                            '#3b82f6',
-                            '#f59e0b'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            max: 500,
+                            title: {
+                                display: true,
+                                text: 'Horas'
+                            }
                         }
                     }
                 }
             });
+
+
         }
 
         // Toast notification function
@@ -1844,13 +2373,13 @@
 
                  // Student data for history
          const studentData = {
-             '2023001': {
-                 name: 'María González',
-                 university: 'UNAM',
+             '633059': {
+                 name: 'Eugenio Mijares',
+                 university: 'UDEM',
                  startDate: '01/09/2024',
-                 currentHours: 320,
+                 currentHours: 267.67,
                  goalHours: 480,
-                 avatar: 'MG',
+                 avatar: 'EM',
                  history: [
                      { 
                          fechaRegistro: '15/01/2025 08:30', 
@@ -1952,13 +2481,13 @@
                      { date: '10/01/2025', reason: 'Falta de equipo de protección', hours: -0.5, appliedBy: 'Coordinador' }
                  ]
              },
-             '2023002': {
-                 name: 'Carlos Rodríguez',
-                 university: 'IPN',
+             '595002': {
+                 name: 'Sebastián González Alfaro',
+                 university: 'UDEM',
                  startDate: '15/08/2024',
-                 currentHours: 180,
-                 goalHours: 240,
-                 avatar: 'CR',
+                 currentHours: 194,
+                 goalHours: 480,
+                 avatar: 'SG',
                  history: [
                      { 
                          fechaRegistro: '14/01/2025 13:45', 
@@ -2047,13 +2576,13 @@
                      { date: '08/01/2025', reason: 'Inasistencia sin aviso', hours: -2, appliedBy: 'Coordinador' }
                  ]
              },
-             '2023003': {
-                 name: 'Ana Martínez',
-                 university: 'UAM',
+             '609847': {
+                 name: 'Diego De La Garza Fernández',
+                 university: 'UDEM',
                  startDate: '20/09/2024',
-                 currentHours: 120,
-                 goalHours: 240,
-                 avatar: 'AM',
+                 currentHours: 53.25,
+                 goalHours: 480,
+                 avatar: 'DD',
                  history: [
                      { 
                          fechaRegistro: '13/01/2025 11:30', 
@@ -2136,6 +2665,168 @@
                  ],
                  bonuses: [
                      { date: '08/01/2025', reason: 'Participación Extraordinaria', hours: 1, appliedBy: 'Coordinador' }
+                 ],
+                 sanctions: [                 ]
+             },
+             '638219': {
+                 name: 'Manuel Eugenio Aguirre Leal',
+                 university: 'UDEM',
+                 startDate: '01/10/2024',
+                 currentHours: 100.5,
+                 goalHours: 480,
+                 avatar: 'MA',
+                 history: [
+                     { 
+                         fechaRegistro: '15/01/2025 08:30', 
+                         fechaActividad: '15/01/2025', 
+                         horaInicio: '09:00', 
+                         horaFin: '13:00', 
+                         multiplicador: 1.0, 
+                         descripcion: 'Limpieza y mantenimiento de áreas verdes en parques públicos',
+                         nota: 'Excelente trabajo en equipo y puntualidad',
+                         activity: 'Limpieza de Parques', 
+                         hours: 4, 
+                         type: 'Servicio', 
+                         status: 'Completado' 
+                     }
+                 ],
+                 bonuses: [
+                     { date: '10/01/2025', reason: 'Liderazgo en Proyecto', hours: 2, appliedBy: 'Coordinador' }
+                 ],
+                 sanctions: []
+             },
+             '599678': {
+                 name: 'Diana Ruanova Cavazos',
+                 university: 'UDEM',
+                 startDate: '15/09/2024',
+                 currentHours: 184.5,
+                 goalHours: 480,
+                 avatar: 'DR',
+                 history: [
+                     { 
+                         fechaRegistro: '15/01/2025 08:30', 
+                         fechaActividad: '15/01/2025', 
+                         horaInicio: '09:00', 
+                         horaFin: '13:00', 
+                         multiplicador: 1.0, 
+                         descripcion: 'Limpieza y mantenimiento de áreas verdes en parques públicos',
+                         nota: 'Excelente trabajo en equipo y puntualidad',
+                         activity: 'Limpieza de Parques', 
+                         hours: 4, 
+                         type: 'Servicio', 
+                         status: 'Completado' 
+                     }
+                 ],
+                 bonuses: [
+                     { date: '10/01/2025', reason: 'Liderazgo en Proyecto', hours: 2, appliedBy: 'Coordinador' }
+                 ],
+                 sanctions: []
+             },
+             '597186': {
+                 name: 'Mauricio Alexis Tinajero Bobadilla',
+                 university: 'UDEM',
+                 startDate: '20/10/2024',
+                 currentHours: 121,
+                 goalHours: 480,
+                 avatar: 'MT',
+                 history: [
+                     { 
+                         fechaRegistro: '15/01/2025 08:30', 
+                         fechaActividad: '15/01/2025', 
+                         horaInicio: '09:00', 
+                         horaFin: '13:00', 
+                         multiplicador: 1.0, 
+                         descripcion: 'Limpieza y mantenimiento de áreas verdes en parques públicos',
+                         nota: 'Excelente trabajo en equipo y puntualidad',
+                         activity: 'Limpieza de Parques', 
+                         hours: 4, 
+                         type: 'Servicio', 
+                         status: 'Completado' 
+                     }
+                 ],
+                 bonuses: [
+                     { date: '10/01/2025', reason: 'Liderazgo en Proyecto', hours: 2, appliedBy: 'Coordinador' }
+                 ],
+                 sanctions: []
+             },
+             '612605': {
+                 name: 'Paula Cantu Ceniceros',
+                 university: 'UDEM',
+                 startDate: '01/11/2024',
+                 currentHours: 223,
+                 goalHours: 480,
+                 avatar: 'PC',
+                 history: [
+                     { 
+                         fechaRegistro: '15/01/2025 08:30', 
+                         fechaActividad: '15/01/2025', 
+                         horaInicio: '09:00', 
+                         horaFin: '13:00', 
+                         multiplicador: 1.0, 
+                         descripcion: 'Limpieza y mantenimiento de áreas verdes en parques públicos',
+                         nota: 'Excelente trabajo en equipo y puntualidad',
+                         activity: 'Limpieza de Parques', 
+                         hours: 4, 
+                         type: 'Servicio', 
+                         status: 'Completado' 
+                     }
+                 ],
+                 bonuses: [
+                     { date: '10/01/2025', reason: 'Liderazgo en Proyecto', hours: 2, appliedBy: 'Coordinador' }
+                 ],
+                 sanctions: []
+             },
+             '629808': {
+                 name: 'Luis Carlos Herrera',
+                 university: 'UDEM',
+                 startDate: '15/11/2024',
+                 currentHours: 219,
+                 goalHours: 480,
+                 avatar: 'LH',
+                 history: [
+                     { 
+                         fechaRegistro: '15/01/2025 08:30', 
+                         fechaActividad: '15/01/2025', 
+                         horaInicio: '09:00', 
+                         horaFin: '13:00', 
+                         multiplicador: 1.0, 
+                         descripcion: 'Limpieza y mantenimiento de áreas verdes en parques públicos',
+                         nota: 'Excelente trabajo en equipo y puntualidad',
+                         activity: 'Limpieza de Parques', 
+                         hours: 4, 
+                         type: 'Servicio', 
+                         status: 'Completado' 
+                     }
+                 ],
+                 bonuses: [
+                     { date: '10/01/2025', reason: 'Liderazgo en Proyecto', hours: 2, appliedBy: 'Coordinador' }
+                 ],
+                 sanctions: []
+             },
+             '636082': {
+                 name: 'Jorge Garcia',
+                 university: 'UDEM',
+                 startDate: '01/12/2024',
+                 currentHours: 48,
+                 goalHours: 480,
+                 avatar: 'JG',
+                 history: [
+                     { 
+                         fechaRegistro: '15/01/2025 08:30', 
+                         fechaActividad: '15/01/2025', 
+                         horaInicio: '09:00', 
+                         horaFin: '13:00', 
+                         multiplicador: 1.0, 
+                         descripcion: 'Limpieza y mantenimiento de áreas verdes en parques públicos',
+                         nota: 'Excelente trabajo en equipo y puntualidad',
+                         activity: 'Limpieza de Parques', 
+                         hours: 4, 
+                         type: 'Servicio', 
+                         status: 'Completado' 
+                     }
+                 ],
+                 bonuses: [
+                     { date: '10/01/2025', reason: 'Liderazgo en Proyecto', hours: 2, appliedBy: 'Coordinador' }
                  ],
                  sanctions: []
              }
@@ -2410,10 +3101,468 @@
              }
          });
 
+         // Function to calculate and update statistics
+         function updateStatistics() {
+             let totalCompletedHours = 0;
+             let totalGoalHours = 0;
+             let graduatingSoonCount = 0;
+             let activeStudentsCount = 0;
+
+             // Calculate statistics from student data
+             Object.values(studentData).forEach(student => {
+                 totalCompletedHours += student.currentHours;
+                 totalGoalHours += student.goalHours;
+                 activeStudentsCount++;
+                 
+                 // Check if student is due to graduate soon (50 hours or less remaining)
+                 const remainingHours = student.goalHours - student.currentHours;
+                 if (remainingHours <= 50) {
+                     graduatingSoonCount++;
+                 }
+             });
+
+             const totalPendingHours = totalGoalHours - totalCompletedHours;
+
+             // Update the statistics in the DOM
+             document.getElementById('stat-active').textContent = activeStudentsCount;
+             document.getElementById('stat-completed').innerHTML = Math.round(totalCompletedHours).toLocaleString() + '<span class="stat-unit">hrs</span>';
+             document.getElementById('stat-graduating').innerHTML = graduatingSoonCount + '<span class="stat-unit">alumnos</span>';
+             document.getElementById('stat-total').innerHTML = Math.round(totalGoalHours).toLocaleString() + '<span class="stat-unit">hrs</span>';
+         }
+
         // Initialize charts when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializeCharts();
+            updateStatistics(); // Update statistics on page load
+            initializeTableFilters(); // Initialize table filters
         });
+
+        // Google Sheets-like Table Filters
+        let activeFilters = {};
+        let originalTableData = [];
+        let currentSort = { column: null, direction: null };
+
+        function initializeTableFilters() {
+            // Store original table data
+            const tableBody = document.getElementById('students-table');
+            const rows = Array.from(tableBody.querySelectorAll('tr'));
+            originalTableData = rows.map(row => ({
+                element: row,
+                data: extractRowData(row)
+            }));
+
+            // Add click event listeners to filterable headers
+            const filterableHeaders = document.querySelectorAll('.filterable-header');
+            filterableHeaders.forEach(header => {
+                header.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFilterDropdown(header);
+                });
+
+                // Initialize filter dropdown functionality
+                const dropdown = header.querySelector('.filter-dropdown');
+                const searchInput = dropdown.querySelector('.filter-search');
+                const clearBtn = dropdown.querySelector('.filter-btn.clear');
+                const applyBtn = dropdown.querySelector('.filter-btn.apply');
+
+                // Search functionality
+                searchInput.addEventListener('input', (e) => {
+                    filterOptionsInDropdown(header, e.target.value);
+                });
+
+                // Clear filter
+                clearBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    clearFilter(header);
+                });
+
+                // Apply filter
+                applyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    applyFilter(header);
+                });
+
+                // Sort buttons
+                const sortAscBtn = dropdown.querySelector('.sort-asc');
+                const sortDescBtn = dropdown.querySelector('.sort-desc');
+
+                console.log('Found sort buttons for column:', header.dataset.column, {
+                    asc: sortAscBtn,
+                    desc: sortDescBtn
+                });
+
+                sortAscBtn.addEventListener('click', (e) => {
+                    console.log('Asc button clicked for column:', header.dataset.column);
+                    e.stopPropagation();
+                    e.preventDefault();
+                    sortTable(header.dataset.column, 'asc');
+                });
+
+                sortDescBtn.addEventListener('click', (e) => {
+                    console.log('Desc button clicked for column:', header.dataset.column);
+                    e.stopPropagation();
+                    e.preventDefault();
+                    sortTable(header.dataset.column, 'desc');
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', closeAllDropdowns);
+
+            // Initialize filter options for each column
+            populateFilterOptions();
+        }
+
+        function toggleFilterDropdown(header) {
+            const dropdown = header.querySelector('.filter-dropdown');
+            const isOpen = dropdown.classList.contains('show');
+
+            // Close all other dropdowns
+            closeAllDropdowns();
+
+            if (!isOpen) {
+                // Position the dropdown properly
+                positionDropdown(header, dropdown);
+                
+                dropdown.classList.add('show');
+                header.classList.add('active');
+                
+                // Focus on search input
+                const searchInput = dropdown.querySelector('.filter-search');
+                setTimeout(() => searchInput.focus(), 100);
+            }
+        }
+
+        function positionDropdown(header, dropdown) {
+            // Reset any previous positioning
+            dropdown.classList.remove('dropdown-up');
+            
+            // Create a temporary clone to measure without affecting the original
+            const clone = dropdown.cloneNode(true);
+            clone.style.position = 'absolute';
+            clone.style.visibility = 'hidden';
+            clone.style.display = 'flex';
+            clone.style.top = '0';
+            clone.style.left = '0';
+            document.body.appendChild(clone);
+            
+            const headerRect = header.getBoundingClientRect();
+            const cloneRect = clone.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            // Check if dropdown would go below viewport
+            const spaceBelow = viewportHeight - headerRect.bottom;
+            const dropdownHeight = cloneRect.height;
+            
+            // If not enough space below, position above
+            if (spaceBelow < dropdownHeight + 10) {
+                dropdown.classList.add('dropdown-up');
+            }
+            
+            // Remove the clone
+            document.body.removeChild(clone);
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.filter-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+            document.querySelectorAll('.filterable-header').forEach(header => {
+                header.classList.remove('active');
+            });
+        }
+
+        function populateFilterOptions() {
+            const filterableHeaders = document.querySelectorAll('.filterable-header');
+            
+            filterableHeaders.forEach(header => {
+                const column = header.dataset.column;
+                const optionsContainer = header.querySelector('.filter-options');
+                const uniqueValues = getUniqueValuesForColumn(column);
+                
+                optionsContainer.innerHTML = '';
+                uniqueValues.forEach(value => {
+                    const option = document.createElement('div');
+                    option.className = 'filter-option';
+                    option.innerHTML = `
+                        <input type="checkbox" id="filter-${column}-${value}" value="${value}">
+                        <label for="filter-${column}-${value}">${value}</label>
+                    `;
+                    optionsContainer.appendChild(option);
+                });
+            });
+        }
+
+        function getUniqueValuesForColumn(column) {
+            const values = new Set();
+            
+            originalTableData.forEach(rowData => {
+                let value = rowData.data[column];
+                
+                // Format value based on column type
+                switch (column) {
+                    case 'progreso':
+                        // Extract percentage from progress bar
+                        const progressText = rowData.element.querySelector('.progress-bar + span');
+                        if (progressText) {
+                            value = progressText.textContent.trim();
+                        }
+                        break;
+                    case 'horas':
+                        // Keep original format for hours
+                        break;
+                    case 'meta':
+                        // Keep original format for meta
+                        break;
+                    default:
+                        // For other columns, use as is
+                        break;
+                }
+                
+                if (value !== undefined && value !== null && value !== '') {
+                    values.add(value);
+                }
+            });
+            
+            return Array.from(values).sort();
+        }
+
+        function extractRowData(row) {
+            const cells = row.querySelectorAll('td');
+            return {
+                matricula: cells[0]?.textContent?.trim() || '',
+                nombre: cells[1]?.textContent?.trim() || '',
+                universidad: cells[2]?.textContent?.trim() || '',
+                fecha: cells[3]?.textContent?.trim() || '',
+                horas: cells[4]?.textContent?.trim() || '',
+                meta: cells[5]?.textContent?.trim() || '',
+                progreso: cells[6]?.textContent?.trim() || '',
+                estado: cells[7]?.textContent?.trim() || ''
+            };
+        }
+
+        function filterOptionsInDropdown(header, searchTerm) {
+            const options = header.querySelectorAll('.filter-option');
+            const term = searchTerm.toLowerCase();
+            
+            options.forEach(option => {
+                const label = option.querySelector('label').textContent.toLowerCase();
+                if (label.includes(term)) {
+                    option.style.display = 'flex';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        function clearFilter(header) {
+            console.log('Clear filter called for column:', header.dataset.column);
+            const column = header.dataset.column;
+            const checkboxes = header.querySelectorAll('input[type="checkbox"]');
+            const indicator = header.querySelector('.active-filter-indicator');
+            
+            // Uncheck all checkboxes
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+            
+            // Remove filter from active filters
+            delete activeFilters[column];
+            
+            // Hide indicator
+            indicator.style.display = 'none';
+            header.classList.remove('has-filter');
+            
+            // Apply filters
+            applyAllFilters();
+        }
+
+        function applyFilter(header) {
+            console.log('Apply filter called for column:', header.dataset.column);
+            const column = header.dataset.column;
+            const checkboxes = header.querySelectorAll('input[type="checkbox"]:checked');
+            const indicator = header.querySelector('.active-filter-indicator');
+            
+            if (checkboxes.length > 0) {
+                const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+                activeFilters[column] = selectedValues;
+                console.log('Selected values:', selectedValues);
+                
+                // Show indicator
+                indicator.style.display = 'block';
+                header.classList.add('has-filter');
+            } else {
+                delete activeFilters[column];
+                indicator.style.display = 'none';
+                header.classList.remove('has-filter');
+            }
+            
+            // Close dropdown
+            header.querySelector('.filter-dropdown').classList.remove('show');
+            header.classList.remove('active');
+            
+            // Apply filters
+            applyAllFilters();
+        }
+
+        function applyAllFilters() {
+            originalTableData.forEach(rowData => {
+                const row = rowData.element;
+                const data = rowData.data;
+                let shouldShow = true;
+                
+                // Check each active filter
+                Object.entries(activeFilters).forEach(([column, values]) => {
+                    let cellValue = data[column];
+                    
+                    // Format value based on column type for comparison
+                    switch (column) {
+                        case 'progreso':
+                            const progressText = row.querySelector('.progress-bar + span');
+                            if (progressText) {
+                                cellValue = progressText.textContent.trim();
+                            }
+                            break;
+                        case 'horas':
+                        case 'meta':
+                            // Keep original format for comparison
+                            break;
+                        default:
+                            // For other columns, use as is
+                            break;
+                    }
+                    
+                    if (!values.includes(cellValue)) {
+                        shouldShow = false;
+                    }
+                });
+                
+                // Show/hide row based on filter results
+                row.style.display = shouldShow ? '' : 'none';
+            });
+
+            // Apply current sort if any
+            if (currentSort.column && currentSort.direction) {
+                applySort();
+            }
+        }
+
+        function sortTable(column, direction) {
+            console.log('Sorting table by:', column, direction);
+            
+            // Update current sort
+            currentSort.column = column;
+            currentSort.direction = direction;
+            
+            // Update sort button states
+            updateSortButtonStates(column, direction);
+            
+            // Apply the sort
+            applySort();
+            
+            // Close the dropdown after sorting
+            const activeHeader = document.querySelector('.filterable-header.active');
+            if (activeHeader) {
+                activeHeader.querySelector('.filter-dropdown').classList.remove('show');
+                activeHeader.classList.remove('active');
+            }
+        }
+
+        function updateSortButtonStates(activeColumn, activeDirection) {
+            // Reset all sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activate the current sort button
+            const activeHeader = document.querySelector(`[data-column="${activeColumn}"]`);
+            if (activeHeader) {
+                const activeBtn = activeHeader.querySelector(`.sort-${activeDirection}`);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+            }
+        }
+
+        function applySort() {
+            if (!currentSort.column || !currentSort.direction) {
+                console.log('No sort criteria set');
+                return;
+            }
+            
+            console.log('Applying sort:', currentSort.column, currentSort.direction);
+            
+            const tableBody = document.getElementById('students-table');
+            const visibleRows = Array.from(tableBody.querySelectorAll('tr')).filter(row => 
+                row.style.display !== 'none'
+            );
+            
+            console.log('Visible rows to sort:', visibleRows.length);
+            
+            // Sort the visible rows
+            visibleRows.sort((a, b) => {
+                const aData = extractRowData(a);
+                const bData = extractRowData(b);
+                
+                let aValue = aData[currentSort.column];
+                let bValue = bData[currentSort.column];
+                
+                // Format values for comparison based on column type
+                switch (currentSort.column) {
+                    case 'matricula':
+                        aValue = parseInt(aValue) || 0;
+                        bValue = parseInt(bValue) || 0;
+                        break;
+                    case 'horas':
+                        // Convert HH:MM format to decimal hours for comparison
+                        aValue = convertTimeToDecimal(aValue);
+                        bValue = convertTimeToDecimal(bValue);
+                        break;
+                    case 'meta':
+                        aValue = parseInt(aValue.replace(' hrs', '')) || 0;
+                        bValue = parseInt(bValue.replace(' hrs', '')) || 0;
+                        break;
+                    case 'progreso':
+                        const aProgressText = a.querySelector('.progress-bar + span');
+                        const bProgressText = b.querySelector('.progress-bar + span');
+                        aValue = parseInt(aProgressText?.textContent?.replace('%', '') || '0');
+                        bValue = parseInt(bProgressText?.textContent?.replace('%', '') || '0');
+                        break;
+                    case 'fecha':
+                        // Convert DD/MM/YYYY to Date object for comparison
+                        aValue = new Date(aValue.split('/').reverse().join('-'));
+                        bValue = new Date(bValue.split('/').reverse().join('-'));
+                        break;
+                    default:
+                        // For text columns, use string comparison
+                        aValue = aValue.toLowerCase();
+                        bValue = bValue.toLowerCase();
+                        break;
+                }
+                
+                // Compare values
+                console.log(`Comparing: ${aValue} vs ${bValue} (${currentSort.direction})`);
+                if (aValue < bValue) return currentSort.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Reorder rows in the table
+            visibleRows.forEach(row => {
+                tableBody.appendChild(row);
+            });
+        }
+
+        function convertTimeToDecimal(timeStr) {
+            if (!timeStr) return 0;
+            const match = timeStr.match(/(\d+):(\d+)/);
+            if (match) {
+                const hours = parseInt(match[1]);
+                const minutes = parseInt(match[2]);
+                return hours + (minutes / 60);
+            }
+            return 0;
+        }
     </script>
 </body>
 </html>

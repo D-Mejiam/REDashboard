@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Inventario de Activos - Simeprode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #111827;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px;
+        }
+
+        .logo:hover {
+            background-color: #f9fafb;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #16a34a;
+        }
+
+        .logo-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .platform-selector {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .platform-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+
+        .platform-selector:hover .platform-dropdown {
+            display: block;
+        }
+
+        .platform-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #374151;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .platform-option:last-child {
+            border-bottom: none;
+        }
+
+        .platform-option:hover {
+            background-color: #f9fafb;
+            color: #111827;
+        }
+
+        .platform-option.active {
+            background-color: #ecfdf5;
+            color: #16a34a;
+        }
+
+        .platform-option-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .platform-option-icon.acolchado {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+
+        .platform-option-icon.mantenimiento {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        .platform-option-icon.servicio-social {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .platform-option-icon.inventario {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .user-info {
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #16a34a;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #16a34a;
+        }
+
+        .nav {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .nav-link.active {
+            background-color: #ecfdf5;
+            color: #16a34a;
+            border-right: 3px solid #16a34a;
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+        }
+
+        .logout-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout-link:hover {
+            color: #991b1b;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .section {
+            background-color: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .section-container {
+            display: none;
+        }
+
+        .section-container.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .section-subtitle {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .search-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            font-size: 16px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        .result-card {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 12px;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+
+        .camera-container {
+            margin-top: 18px;
+            border-radius: 16px;
+            border: 1px dashed #d1d5db;
+            padding: 16px;
+            display: none;
+        }
+
+        .camera-container.active {
+            display: block;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            margin-top: 12px;
+        }
+
+        .truck-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+            background-color: #ffffff;
+        }
+
+        .truck-card.active {
+            border-color: #10b981;
+            box-shadow: 0 20px 35px rgba(16, 185, 129, 0.15);
+        }
+
+        .truck-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .truck-meta {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            background-color: #ecfdf5;
+            color: #047857;
+            margin-right: 8px;
+        }
+
+        .review-panel {
+            margin-top: 24px;
+            border: 1px solid #e5e7eb;
+            border-radius: 18px;
+            padding: 24px;
+            background-color: #f9fafb;
+        }
+
+        .review-scanner {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .review-scanner input {
+            flex: 1;
+            min-width: 220px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            font-size: 15px;
+        }
+
+        .review-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .review-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .items-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .toolbox-review {
+            margin-top: 20px;
+            border: 1px solid #fde68a;
+            border-radius: 14px;
+            background-color: #fffbeb;
+            padding: 20px;
+            display: none;
+        }
+
+        .toolbox-review.active {
+            display: block;
+        }
+
+        .toolbox-review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .toolbox-items {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .toolbox-item {
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid #f87171;
+            color: #b91c1c;
+            background-color: #fef2f2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s ease, border 0.2s ease;
+        }
+
+        .toolbox-item.verified {
+            border-color: #34d399;
+            background-color: #ecfdf5;
+            color: #047857;
+        }
+
+        .toolbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .toolbox-item label {
+            cursor: pointer;
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .toolbox-item:not(.verified) label {
+            color: #b91c1c;
+        }
+
+        .toolbox-item.verified label {
+            color: #047857;
+        }
+
+        .item-chip {
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid #f87171;
+            color: #b91c1c;
+            background-color: #fef2f2;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: background 0.2s ease, border 0.2s ease;
+        }
+
+        .item-chip span {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .item-chip.verified {
+            border-color: #34d399;
+            background-color: #ecfdf5;
+            color: #047857;
+        }
+
+        .item-chip.in-review {
+            border-color: #facc15;
+            background-color: #fef9c3;
+            color: #92400e;
+        }
+
+        .toolbox-btn {
+            margin-top: 8px;
+            align-self: flex-start;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: none;
+            background-color: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .toolbox-btn:hover {
+            background-color: #fde68a;
+        }
+
+        .status-legend {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .dot-missing {
+            background-color: #f87171;
+        }
+
+        .dot-verified {
+            background-color: #34d399;
+        }
+
+        .dot-toolbox {
+            background-color: #facc15;
+        }
+
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            background-color: #047857;
+            color: #ffffff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(4, 120, 87, 0.25);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: toast-in 0.25s forwards;
+            z-index: 100;
+        }
+
+        @keyframes toast-in {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 960px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="platform-selector">
+                <div class="logo">
+                    <div class="logo-icon">📦</div>
+                    <div>
+                        <div class="logo-text">Inventario Activos</div>
+                        <div class="logo-subtitle">Simeprode</div>
+                    </div>
+                </div>
+                <div class="platform-dropdown">
+                    <a href="index.html" class="platform-option">
+                        <div class="platform-option-icon acolchado">🌱</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Acolchado Vegetal</div>
+                            <div class="platform-option-subtitle">Control de consumo</div>
+                        </div>
+                    </a>
+                    <a href="mantenimiento.html" class="platform-option">
+                        <div class="platform-option-icon mantenimiento">🔧</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Mantenimiento</div>
+                            <div class="platform-option-subtitle">Gestión de equipos</div>
+                        </div>
+                    </a>
+                    <a href="servicio-social.html" class="platform-option">
+                        <div class="platform-option-icon servicio-social">👥</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Servicio Social</div>
+                            <div class="platform-option-subtitle">Gestión de voluntarios</div>
+                        </div>
+                    </a>
+                    <a href="inventario.html" class="platform-option active">
+                        <div class="platform-option-icon inventario">📦</div>
+                        <div class="platform-option-text">
+                            <div class="platform-option-title">Inventario Activos</div>
+                            <div class="platform-option-subtitle">Control por camioneta</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="user-info">
+                <div class="user-avatar">A</div>
+                <div class="user-name">Administrador</div>
+                <div class="user-role">Control de activos</div>
+                <div class="user-status">
+                    <div class="status-dot"></div>
+                    <div class="status-text">Activo</div>
+                </div>
+            </div>
+
+            <nav>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="buscar">
+                            <div class="nav-icon">🔍</div>
+                            Buscar Artículo
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="inventario">
+                            <div class="nav-icon">🚚</div>
+                            Inventario General
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="logout">
+                <a href="#" class="logout-link">
+                    <div class="nav-icon">🚪</div>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div>
+                    <h1 class="header-title">Control de Inventario de Activos</h1>
+                    <p class="header-subtitle">Escanea códigos de barras para conocer la ubicación y estatus de cada herramienta.</p>
+                </div>
+            </header>
+
+            <div id="buscar" class="section-container active">
+                <section class="section">
+                    <h2 class="section-title">Buscar Artículo</h2>
+                    <p class="section-subtitle">Ingresa manualmente el código o activa la cámara para escanear un código de barras.</p>
+
+                    <div class="search-area">
+                        <input id="barcodeInput" class="search-input" type="text" placeholder="Ej: REX_0001" autocomplete="off">
+                        <button id="cameraButton" class="btn btn-primary">📷 Activar cámara</button>
+                    </div>
+
+                    <div class="result-card" id="searchResult">
+                        Ingresa o escanea un código para conocer la camioneta a la que pertenece.
+                    </div>
+
+                    <div class="camera-container" id="cameraWrapper">
+                        <video id="cameraPreview" autoplay muted playsinline></video>
+                        <p style="margin-top: 10px; font-size: 14px; color: #6b7280;">
+                            Apunta el código de barras dentro del recuadro. El sistema cambiará automáticamente el estatus del artículo cuando lo detecte.
+                        </p>
+                    </div>
+                </section>
+            </div>
+
+            <div id="inventario" class="section-container">
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Inventario General</h2>
+                        <p class="section-subtitle">Revisa el inventario de cada camioneta y confirma los artículos durante la auditoría.</p>
+                    </div>
+
+                    <div class="cards-grid" id="vehicleCards"></div>
+
+                    <div class="review-panel" id="reviewPanel">
+                        <div class="review-header">
+                            <div>
+                                <div class="review-title" id="reviewTitle">Selecciona una camioneta para comenzar la revisión.</div>
+                                <p id="reviewSubtitle" style="color:#6b7280;">Pulsa la tarjeta de la camioneta y luego "Revisión General" para desplegar todos los artículos.</p>
+                            </div>
+                            <div class="status-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot dot-missing"></span> Falta por revisar
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot dot-verified"></span> Revisado
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot dot-toolbox"></span> Revisión interna pendiente
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-scanner">
+                            <input id="inventoryBarcodeInput" type="text" placeholder="Escanea aquí (REX_0001)" autocomplete="off">
+                            <small style="color:#6b7280;">Los códigos válidos se procesan automáticamente.</small>
+                        </div>
+                        <ul class="items-list" id="truckItemsList"></ul>
+                        <div class="toolbox-review" id="toolboxReview">
+                            <div class="toolbox-review-header">
+                                <div>
+                                    <h3 style="margin-bottom:4px;">Revisión de Caja de Herramientas</h3>
+                                    <p style="color:#92400e;font-size:14px;">Escanea los artículos con código desde el input principal o marca los checkboxes para validar manualmente.</p>
+                                </div>
+                                <button class="btn btn-secondary" id="closeToolboxReview">Cerrar</button>
+                            </div>
+                            <ul class="toolbox-items" id="toolboxItemsList"></ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js" integrity="sha512-O0FfLgNVr7DiIP9N6byN1Nsx3Rp3XIanFkFJxuxMxDPZWS9Vyuk3F7S3w7Dnk3a1JpN96CBvs1+qsSVqSdz+Tw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const inventoryData = {
+            camioneta001: {
+                id: 'camioneta001',
+                name: 'Camioneta 001',
+                plates: 'REX-001',
+                items: [
+                    { code: 'REX_0001', name: 'Pala Cuadrada' },
+                    { code: 'REX_0002', name: 'Pala Redonda' },
+                    { code: 'REX_0003', name: 'Pico' },
+                    { 
+                        code: 'REX_0004', 
+                        name: 'Caja de Herramientas',
+                        subItems: [
+                            { code: 'REX_0007', name: 'Lata de pintura' },
+                            { name: 'Estacas', manual: true },
+                            { name: 'Pedacería de tubería naranja', manual: true },
+                            { name: 'Hilo', manual: true }
+                        ]
+                    },
+                    { code: 'REX_0005', name: 'Llanta de refacción' },
+                    { code: 'REX_0006', name: 'Gato Hidráulico' }
+                ]
+            },
+            camioneta002: {
+                id: 'camioneta002',
+                name: 'Camioneta 002',
+                plates: 'REX-002',
+                items: [
+                    { code: 'REX_0001', name: 'Pala Cuadrada' },
+                    { code: 'REX_0002', name: 'Pala Redonda' },
+                    { code: 'REX_0003', name: 'Pico' },
+                    { 
+                        code: 'REX_0004', 
+                        name: 'Caja de Herramientas',
+                        subItems: [
+                            { code: 'REX_0007', name: 'Lata de pintura' },
+                            { name: 'Estacas', manual: true },
+                            { name: 'Pedacería de tubería naranja', manual: true },
+                            { name: 'Hilo', manual: true }
+                        ]
+                    },
+                    { code: 'REX_0005', name: 'Llanta de refacción' },
+                    { code: 'REX_0006', name: 'Gato Hidráulico' }
+                ]
+            }
+        };
+
+        const TOOLBOX_CODE = 'REX_0004';
+        const itemStatus = {};
+        const toolboxStatus = {};
+        let activeTruckId = null;
+        let cameraActive = false;
+        let currentToolboxTruck = null;
+        const CODE_PATTERN = /^REX_\d{4}$/;
+
+        Object.keys(inventoryData).forEach(truckId => {
+            itemStatus[truckId] = {};
+            toolboxStatus[truckId] = {};
+            inventoryData[truckId].items.forEach(item => {
+                const code = item.code.toUpperCase();
+                itemStatus[truckId][code] = 'pending';
+                if (item.subItems && code === TOOLBOX_CODE) {
+                    item.subItems.forEach(sub => {
+                        if (sub.code) {
+                            toolboxStatus[truckId][sub.code.toUpperCase()] = false;
+                        } else if (sub.manual) {
+                            // Para artículos manuales, usar un ID basado en el nombre
+                            const manualId = sub.name.toLowerCase().replace(/\s+/g, '-');
+                            toolboxStatus[truckId][manualId] = false;
+                        }
+                    });
+                }
+            });
+        });
+
+        const barcodeInput = document.getElementById('barcodeInput');
+        const searchResult = document.getElementById('searchResult');
+        const vehicleCardsContainer = document.getElementById('vehicleCards');
+        const reviewPanel = document.getElementById('reviewPanel');
+        const reviewTitle = document.getElementById('reviewTitle');
+        const reviewSubtitle = document.getElementById('reviewSubtitle');
+        const itemsList = document.getElementById('truckItemsList');
+        const cameraButton = document.getElementById('cameraButton');
+        const cameraWrapper = document.getElementById('cameraWrapper');
+        const inventoryBarcodeInput = document.getElementById('inventoryBarcodeInput');
+        const toolboxReview = document.getElementById('toolboxReview');
+        const toolboxItemsList = document.getElementById('toolboxItemsList');
+        const closeToolboxReviewBtn = document.getElementById('closeToolboxReview');
+
+        barcodeInput.addEventListener('input', () => {
+            const code = barcodeInput.value.trim().toUpperCase();
+            if (CODE_PATTERN.test(code)) {
+                handleCodeScan(code);
+            }
+        });
+
+        if (inventoryBarcodeInput) {
+            inventoryBarcodeInput.addEventListener('input', () => {
+                const code = inventoryBarcodeInput.value.trim().toUpperCase();
+                if (CODE_PATTERN.test(code)) {
+                    handleCodeScan(code);
+                    inventoryBarcodeInput.value = '';
+                }
+            });
+        }
+
+        cameraButton.addEventListener('click', () => {
+            cameraActive ? stopCamera() : startCamera();
+        });
+
+        if (closeToolboxReviewBtn) {
+            closeToolboxReviewBtn.addEventListener('click', () => {
+                toolboxReview.classList.remove('active');
+                currentToolboxTruck = null;
+            });
+        }
+
+
+        if (itemsList) {
+            itemsList.addEventListener('click', (event) => {
+                if (event.target.matches('.toolbox-btn')) {
+                    const truckId = event.target.dataset.truck;
+                    openToolboxReview(truckId);
+                }
+            });
+        }
+
+        // Event listener para checkboxes manuales de subartículos
+        if (toolboxItemsList) {
+            toolboxItemsList.addEventListener('change', (event) => {
+                if (event.target.matches('.toolbox-item-input')) {
+                    const manualId = event.target.dataset.manualId;
+                    const truckId = event.target.dataset.truck;
+                    if (!toolboxStatus[truckId]) return;
+                    
+                    toolboxStatus[truckId][manualId] = event.target.checked;
+                    
+                    // Actualizar la clase verified del contenedor
+                    const li = event.target.closest('.toolbox-item');
+                    if (li) {
+                        if (event.target.checked) {
+                            li.classList.add('verified');
+                        } else {
+                            li.classList.remove('verified');
+                        }
+                    }
+                    
+                    checkToolboxComplete(truckId);
+                }
+            });
+        }
+
+        function renderVehicleCards() {
+            vehicleCardsContainer.innerHTML = '';
+            Object.values(inventoryData).forEach(truck => {
+                const card = document.createElement('div');
+                card.className = 'truck-card';
+                card.dataset.truck = truck.id;
+                card.innerHTML = `
+                    <div class="truck-title">${truck.name}</div>
+                    <div class="truck-meta">Placas ${truck.plates}</div>
+                    <div style="margin-bottom: 14px;">
+                        <span class="tag">${truck.items.length} artículos</span>
+                        <span class="tag" style="background:#e0f2fe;color:#0369a1;">Unidad ${truck.id === 'camioneta001' ? '001' : '002'}</span>
+                    </div>
+                    <button class="btn btn-secondary" data-action="review">Revisión General</button>
+                `;
+
+                card.addEventListener('click', (e) => {
+                    if (e.target.matches('button[data-action="review"]')) {
+                        showTruckReview(truck.id);
+                        e.stopPropagation();
+                        return;
+                    }
+                    highlightTruckCard(truck.id);
+                });
+
+                vehicleCardsContainer.appendChild(card);
+            });
+        }
+
+        function highlightTruckCard(truckId) {
+            document.querySelectorAll('.truck-card').forEach(card => {
+                if (card.dataset.truck === truckId) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+            activeTruckId = truckId;
+        }
+
+        function showTruckReview(truckId) {
+            activeTruckId = truckId;
+            document.querySelectorAll('.truck-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.truck === truckId);
+            });
+
+            const truck = inventoryData[truckId];
+            reviewTitle.textContent = `${truck.name} • ${truck.plates}`;
+            reviewSubtitle.textContent = `Revisando ${truck.items.length} artículos asignados a la unidad.`;
+
+            if (toolboxReview && currentToolboxTruck !== truckId) {
+                toolboxReview.classList.remove('active');
+                currentToolboxTruck = null;
+            }
+
+            itemsList.innerHTML = '';
+            truck.items.forEach(item => {
+                const code = item.code.toUpperCase();
+                const li = document.createElement('li');
+                li.className = `item-chip ${getStatusClass(itemStatus[truckId][code])}`;
+                li.dataset.code = code;
+                li.dataset.truck = truckId;
+                li.innerHTML = `
+                    <div>${item.name}</div>
+                    <span>Código: ${item.code}</span>
+                `;
+
+                if (item.subItems && code === TOOLBOX_CODE) {
+                    const note = document.createElement('span');
+                    note.style.fontSize = '12px';
+                    note.style.color = '#92400e';
+                    note.textContent = 'Incluye artículos internos';
+                    li.appendChild(note);
+
+                    const button = document.createElement('button');
+                    button.className = 'toolbox-btn';
+                    button.dataset.truck = truckId;
+                    button.dataset.code = code;
+                    button.textContent = 'Revisión';
+                    li.appendChild(button);
+                }
+
+                itemsList.appendChild(li);
+            });
+        }
+
+        function getStatusClass(status) {
+            if (status === 'verified') return 'verified';
+            if (status === 'in-review') return 'in-review';
+            return '';
+        }
+
+        function openToolboxReview(truckId) {
+            if (!toolboxReview || !toolboxItemsList) return;
+            const truck = inventoryData[truckId];
+            if (!truck) return;
+            const toolboxItem = truck.items.find(item => item.code.toUpperCase() === TOOLBOX_CODE);
+            if (!toolboxItem) return;
+            currentToolboxTruck = truckId;
+            toolboxReview.classList.add('active');
+            renderToolboxItems(truckId, toolboxItem);
+        }
+
+        function renderToolboxItems(truckId, toolboxItem) {
+            if (!toolboxItemsList) return;
+            toolboxItemsList.innerHTML = '';
+            toolboxItem.subItems.forEach(sub => {
+                const li = document.createElement('li');
+                
+                if (sub.code) {
+                    // Artículo con código - mostrar como chip
+                    const subCode = sub.code.toUpperCase();
+                    const isVerified = toolboxStatus[truckId]?.[subCode] || false;
+                    li.className = `item-chip ${isVerified ? 'verified' : ''}`;
+                    li.dataset.code = subCode;
+                    li.dataset.truck = truckId;
+                    li.innerHTML = `
+                        <div>${sub.name}</div>
+                        <span>Código: ${sub.code}</span>
+                    `;
+                } else if (sub.manual) {
+                    // Artículo manual - mostrar con checkbox
+                    const manualId = sub.name.toLowerCase().replace(/\s+/g, '-');
+                    const isVerified = toolboxStatus[truckId]?.[manualId] || false;
+                    li.className = `toolbox-item ${isVerified ? 'verified' : ''}`;
+                    li.innerHTML = `
+                        <input type="checkbox" class="toolbox-item-input" data-manual-id="${manualId}" data-truck="${truckId}" ${isVerified ? 'checked' : ''}>
+                        <label>${sub.name}</label>
+                    `;
+                }
+                
+                toolboxItemsList.appendChild(li);
+            });
+        }
+
+        function areAllToolboxItemsVerified(truckId) {
+            const truck = inventoryData[truckId];
+            if (!truck) return false;
+            const toolboxItem = truck.items.find(item => item.code.toUpperCase() === TOOLBOX_CODE);
+            if (!toolboxItem || !toolboxItem.subItems) return false;
+            const statuses = toolboxStatus[truckId];
+            if (!statuses) return false;
+            
+            return toolboxItem.subItems.every(sub => {
+                if (sub.code) {
+                    // Artículo con código
+                    return statuses[sub.code.toUpperCase()] === true;
+                } else if (sub.manual) {
+                    // Artículo manual
+                    const manualId = sub.name.toLowerCase().replace(/\s+/g, '-');
+                    return statuses[manualId] === true;
+                }
+                return false;
+            });
+        }
+
+        function checkToolboxComplete(truckId) {
+            if (areAllToolboxItemsVerified(truckId)) {
+                itemStatus[truckId][TOOLBOX_CODE] = 'verified';
+                updateChipStatus(truckId, TOOLBOX_CODE);
+                if (toolboxReview) toolboxReview.classList.remove('active');
+                currentToolboxTruck = null;
+                showToast('Caja de herramientas verificada completamente.');
+            }
+        }
+
+        function updateChipStatus(truckId, code) {
+            if (activeTruckId !== truckId) return;
+            const chip = document.querySelector(`.item-chip[data-code="${code}"]`);
+            if (!chip) return;
+            chip.classList.remove('verified', 'in-review');
+            const statusClass = getStatusClass(itemStatus[truckId][code]);
+            if (statusClass) chip.classList.add(statusClass);
+        }
+
+        function handleCodeScan(code) {
+            if (!code) {
+                showToast('Introduce un código válido.', true);
+                return;
+            }
+
+            // Primero buscar en artículos principales
+            const matches = Object.values(inventoryData).filter(truck =>
+                truck.items.some(item => item.code.toUpperCase() === code)
+            );
+
+            // Si no se encuentra, buscar en subartículos
+            if (matches.length === 0) {
+                const subItemMatches = [];
+                Object.values(inventoryData).forEach(truck => {
+                    truck.items.forEach(item => {
+                        if (item.subItems) {
+                            const subItem = item.subItems.find(sub => sub.code.toUpperCase() === code);
+                            if (subItem) {
+                                subItemMatches.push({ truck, subItem, parentItem: item });
+                            }
+                        }
+                    });
+                });
+
+                if (subItemMatches.length === 0) {
+                    searchResult.innerHTML = `El código <strong>${code}</strong> no está asignado a ninguna camioneta.`;
+                    showToast('Código no encontrado.', true);
+                    return;
+                }
+
+                // Procesar subartículos encontrados
+                subItemMatches.forEach(({ truck, subItem, parentItem }) => {
+                    markSubItemVerified(truck.id, subItem.code.toUpperCase());
+                });
+
+                if (subItemMatches.length === 1) {
+                    const { truck, subItem, parentItem } = subItemMatches[0];
+                    searchResult.innerHTML = `
+                        El artículo con código <strong>${code}</strong> (${subItem.name}) pertenece a la <strong>${parentItem.name}</strong> de <strong>${truck.name}</strong> (${truck.plates}).
+                    `;
+                } else {
+                    const list = subItemMatches.map(({ truck, subItem, parentItem }) => 
+                        `<li>${subItem.name} en ${parentItem.name} de ${truck.name} (${truck.plates})</li>`
+                    ).join('');
+                    searchResult.innerHTML = `
+                        El artículo con código <strong>${code}</strong> está registrado en:
+                        <ul style="margin-left:20px;margin-top:6px;">${list}</ul>
+                    `;
+                }
+                showToast('Subartículo verificado correctamente.');
+                barcodeInput.value = '';
+                return;
+            }
+
+            // Procesar artículos principales
+            if (matches.length === 1) {
+                const match = matches[0];
+                searchResult.innerHTML = `
+                    El artículo con código <strong>${code}</strong> pertenece a <strong>${match.name}</strong> (${match.plates}).
+                `;
+                markItemVerified(match.id, code);
+            } else {
+                const list = matches.map(truck => `<li>${truck.name} (${truck.plates})</li>`).join('');
+                searchResult.innerHTML = `
+                    El artículo con código <strong>${code}</strong> está registrado en:
+                    <ul style="margin-left:20px;margin-top:6px;">${list}</ul>
+                `;
+                matches.forEach((truck, index) => markItemVerified(truck.id, code, { silentToast: index > 0 }));
+            }
+
+            barcodeInput.value = '';
+        }
+
+        function markSubItemVerified(truckId, subCode) {
+            const normalizedCode = subCode.toUpperCase();
+            if (!toolboxStatus[truckId]) return;
+            
+            toolboxStatus[truckId][normalizedCode] = true;
+            
+            // Actualizar el chip del subartículo en el panel de revisión
+            if (currentToolboxTruck === truckId && toolboxItemsList) {
+                const chip = toolboxItemsList.querySelector(`.item-chip[data-code="${normalizedCode}"]`);
+                if (chip) {
+                    chip.classList.add('verified');
+                }
+            }
+            
+            // Verificar si todos los subartículos están completos
+            checkToolboxComplete(truckId);
+        }
+
+        function markItemVerified(truckId, code, options = {}) {
+            const normalizedCode = code.toUpperCase();
+            const statusMap = itemStatus[truckId];
+            if (!statusMap) return;
+
+            const item = inventoryData[truckId].items.find(i => i.code.toUpperCase() === normalizedCode);
+            if (!item) return;
+
+            if (item.subItems && normalizedCode === TOOLBOX_CODE) {
+                if (areAllToolboxItemsVerified(truckId)) {
+                    if (statusMap[normalizedCode] !== 'verified') {
+                        statusMap[normalizedCode] = 'verified';
+                        updateChipStatus(truckId, normalizedCode);
+                        if (!options.silentToast) showToast('Caja de herramientas verificada.');
+                    }
+                } else {
+                    statusMap[normalizedCode] = 'in-review';
+                    updateChipStatus(truckId, normalizedCode);
+                    if (!options.silentToast) showToast('Revisión interna pendiente: valida la caja de herramientas.');
+                    if (activeTruckId === truckId) {
+                        openToolboxReview(truckId);
+                    }
+                }
+                return;
+            }
+
+            if (statusMap[normalizedCode] === 'verified') return;
+            statusMap[normalizedCode] = 'verified';
+            updateChipStatus(truckId, normalizedCode);
+            if (!options.silentToast) {
+                showToast('Artículo verificado correctamente.');
+            }
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.backgroundColor = isError ? '#b91c1c' : '#047857';
+            toast.textContent = message;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast('La cámara no es compatible en este dispositivo.', true);
+                return;
+            }
+
+            cameraButton.textContent = '✋ Detener cámara';
+            cameraWrapper.classList.add('active');
+
+            Quagga.init({
+                inputStream: {
+                    type: 'LiveStream',
+                    target: document.getElementById('cameraPreview'),
+                    constraints: {
+                        width: { min: 640 },
+                        height: { min: 480 },
+                        facingMode: 'environment'
+                    }
+                },
+                decoder: {
+                    readers: ['code_128_reader', 'ean_reader', 'ean_8_reader'],
+                    multiple: false
+                },
+                locate: true
+            }, (err) => {
+                if (err) {
+                    showToast('No se pudo iniciar la cámara: ' + err, true);
+                    stopCamera();
+                    return;
+                }
+                Quagga.start();
+                cameraActive = true;
+            });
+
+            Quagga.onDetected(onBarcodeDetected);
+        }
+
+        function stopCamera() {
+            cameraButton.textContent = '📷 Activar cámara';
+            cameraWrapper.classList.remove('active');
+            if (cameraActive) {
+                Quagga.stop();
+                Quagga.offDetected(onBarcodeDetected);
+                cameraActive = false;
+            }
+        }
+
+        function onBarcodeDetected(result) {
+            const code = result.codeResult?.code?.trim().toUpperCase();
+            if (!code) return;
+            handleCodeScan(code);
+        }
+
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sectionContainers = document.querySelectorAll('.section-container');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const sectionId = link.dataset.section;
+
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    sectionContainers.forEach(section => {
+                        section.classList.toggle('active', section.id === sectionId);
+                    });
+                });
+            });
+        }
+
+        renderVehicleCards();
+        setupNavigation();
+    </script>
+</body>
+</html>
+
